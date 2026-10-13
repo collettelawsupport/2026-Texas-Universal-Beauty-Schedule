@@ -47,7 +47,7 @@ function eventResults() {
   if (state.tab === 'mine' && !watched().length) return `<div class="empty-state"><span class="empty-icon">${icons.heart}</span><h3>Your weekend, made personal.</h3><p>Choose the contestants you’re cheering for to see their events here.</p><button class="button primary" data-go="contestants">Find contestants ${icons.arrow}</button></div>`;
   const list = filteredEvents();
   if (!list.length) return `<div class="empty-state"><span class="empty-icon">${icons.search}</span><h3>No events in this view</h3><p>Try a different day or clear your filters.</p><button class="button button-outline" id="reset-filters">Show all events</button></div>`;
-  return `<p class="result-count" aria-live="polite">${list.length} events${state.tab === 'mine' ? ` for ${selected().length === 1 ? h(selected()[0].name) : 'your cheering section'}` : ' across the weekend'} <span>Tap an event for the details</span></p>${days.map((d, i) => {
+  return `<p class="result-count" aria-live="polite">${list.length} event${list.length === 1 ? '' : 's'}${state.tab === 'mine' ? ` for ${selected().length === 1 ? h(selected()[0].name) : 'your cheering section'}` : ' across the weekend'} <span>Tap an event for the details</span></p>${days.map((d, i) => {
     const todayEvents = list.filter(e => e.date === d.date);
     return todayEvents.length ? `<section class="day-section"><div class="day-heading"><span class="date-stamp"><small>${d.month}</small><strong>${d.number}</strong></span><div><span class="day-kicker">DAY ${String(i + 1).padStart(2, '0')} · ${d.label.toUpperCase()}</span><h2>${d.title}</h2><p>${d.subtitle}</p></div></div><div class="event-list">${todayEvents.map(eventCard).join('')}</div></section>` : '';
   }).join('')}`;
