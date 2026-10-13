@@ -80,7 +80,9 @@ The Netlify project is `texas-universal-beauty-2026` (ID `29ab997e-0f97-4f5b-a99
 
 The source repository is https://github.com/collettelawsupport/2026-Texas-Universal-Beauty-Schedule.
 
-To deploy manually after configuration:
+Automatic publishing is connected to the repository’s `main` branch. Each push triggers a Netlify build. Configure roster secrets in Netlify before redeploying to activate the live roster.
+
+For an occasional manual deploy (the next `main` push replaces it):
 
 ```sh
 npm run build
