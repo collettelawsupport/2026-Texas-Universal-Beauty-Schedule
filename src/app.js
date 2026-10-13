@@ -3,7 +3,8 @@ import { STORE_KEY, escapeHTML as h, matchesContestant, scheduleFor, timeLabel, 
 const $ = selector => document.querySelector(selector);
 let saved;
 try { saved = parseSaved(localStorage.getItem(STORE_KEY)); } catch { saved = parseSaved(null); }
-const state = { ...saved, roster: [], rosterState: 'loading', syncedAt: null, tab: 'schedule', day: 'all', category: 'all', search: '', division: 'all', person: 'all', onlyWatched: false };
+const initialTab = ['mine', 'contestants'].includes(location.hash.slice(1)) ? location.hash.slice(1) : 'schedule';
+const state = { ...saved, roster: [], rosterState: 'loading', syncedAt: null, tab: initialTab, day: 'all', category: 'all', search: '', division: 'all', person: 'all', onlyWatched: false };
 let toastTimer;
 const icons = {
   calendar: '<svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M7 3v4m10-4v4M3 11h18m4 4h4"/></svg>',

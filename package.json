@@ -13,6 +13,7 @@
     "import:roster": "node scripts/import-roster.mjs"
   },
   "dependencies": {
+    "@netlify/blobs": "^11.1.4",
     "exceljs": "4.4.0"
   }
 }
