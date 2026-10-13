@@ -110,6 +110,14 @@ if (signOut) {
   document.querySelector('#queens-search').addEventListener('input', event => { query = event.target.value.trim().toLowerCase(); render(); });
   document.querySelector('#refresh-queens').addEventListener('click', loadSchedule);
   document.querySelector('#print-queens').addEventListener('click', () => window.print());
+  let expandedForPrint = [];
+  window.addEventListener('beforeprint', () => {
+    expandedForPrint = [...document.querySelectorAll('.queens-event:not([open])')];
+    expandedForPrint.forEach(card => { card.open = true; });
+  });
+  window.addEventListener('afterprint', () => {
+    expandedForPrint.forEach(card => { card.open = false; }); expandedForPrint = [];
+  });
   // Private schedule data lives only in memory; recheck access when returning to the page.
   window.addEventListener('pagehide', () => { schedule = null; eventsElement.replaceChildren(); });
   window.addEventListener('pageshow', event => { if (event.persisted) loadSchedule(); });
