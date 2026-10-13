@@ -1,9 +1,10 @@
-import { configured, createSession, json, readLoginBody, sameOrigin, sessionCookie, settings, verifyPassword } from '../lib/queens-auth.mjs';
+import { configured, createSession, json, readLoginBody, sameOrigin, sessionCookie, verifyPassword } from '../lib/queens-auth.mjs';
+import { loadAccess } from '../lib/queens-access.mjs';
 
 export default async function handler(request) {
   if (request.method !== 'POST') return json({ message: 'Method not allowed.' }, 405, { allow: 'POST' });
   if (!sameOrigin(request)) return json({ message: 'Please sign in from the Queens page.' }, 403);
-  const config = settings();
+  const config = await loadAccess();
   if (!configured(config)) return json({ message: 'Queens access is being prepared. Please try again shortly.' }, 503);
   let body;
   try { body = await readLoginBody(request); } catch { return json({ message: 'Please enter the Queens password.' }, 400); }

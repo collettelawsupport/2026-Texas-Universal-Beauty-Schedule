@@ -79,9 +79,9 @@ test('private data cannot be loaded without an authenticated session', async () 
   assert.equal(unavailable.status, 503); assert.doesNotMatch(await unavailable.text(), /private internal details/);
 });
 test('page and logout keep access behind the session', async () => {
-  const locked = page(request('/queens/'));
+  const locked = await page(request('/queens/'));
   assert.match(await locked.text(), /id="queens-login"/);
-  const unlocked = page(request('/queens/', { token: createSession(config) }));
+  const unlocked = await page(request('/queens/', { token: createSession(config) }));
   const html = await unlocked.text();
   assert.match(html, /id="queens-events"/); assert.doesNotMatch(html, /id="queens-login"/);
   assert.match(unlocked.headers.get('cache-control'), /no-store/);

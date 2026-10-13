@@ -1,8 +1,9 @@
 import { privateHeaders, sessionFor } from '../lib/queens-auth.mjs';
+import { loadAccess } from '../lib/queens-access.mjs';
 
-export default function handler(request) {
+export default async function handler(request) {
   if (!['GET', 'HEAD'].includes(request.method)) return new Response('Method not allowed', { status: 405, headers: { ...privateHeaders, allow: 'GET, HEAD' } });
-  const unlocked = Boolean(sessionFor(request));
+  const unlocked = Boolean(sessionFor(request, await loadAccess()));
   const html = `<!doctype html><html lang="en"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#ae365d"><meta name="robots" content="noindex,nofollow">
 <title>Queens’ Schedule · Texas OLM 2026</title><link rel="icon" href="/assets/favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="/src/styles.css"><link rel="stylesheet" href="/src/queens.css"></head>
