@@ -47,11 +47,18 @@ test('only the approved Prince marker survives feed sanitation', () => {
   assert.deepEqual(sanitizeRoster({ contestants: [{ ...base, program: '<script>' }] }), [base]);
 });
 
-test('published organizer roster contains the 15 supplied contestants and canonical divisions', async () => {
+test('published organizer roster contains the 17 approved contestants and canonical divisions', async () => {
   const data = JSON.parse(await readFile(new URL('../public/data/roster.json', import.meta.url)));
   const roster = sanitizeRoster(data);
   assert.equal(data.source, 'published-snapshot');
-  assert.equal(roster.length, 15);
+  assert.equal(roster.length, 17);
   assert.deepEqual(roster.filter(c => c.program === 'prince').map(c => c.name), ['Paxtyn Pike', 'Silas Elgourbi']);
   assert.ok(roster.every(c => divisions.includes(c.division)));
+  const sydni = roster.find(c => c.name === 'Sydni Lee');
+  const brittany = roster.find(c => c.name === 'Brittany Skye Pike');
+  assert.equal(sydni.division, '3 - 6 years');
+  assert.deepEqual(sydni.optionals, ['optional-talent']);
+  assert.equal(brittany.division, '7 - 9 years');
+  assert.deepEqual(brittany.optionals, ['practice-interview']);
+  assert.ok(!roster.some(c => c.name === 'Allison Nice'));
 });
