@@ -4,3 +4,6 @@
 @media print{.queens-hero,.queens-welcome,.queens-search,.queens-status,.queens-private-note{display:none!important}.queens-layout{display:block}.queens-page .section-heading p{display:none}.queens-page .event-card{break-inside:avoid}.queens-page .event-time small{font-size:9px}}
 .queens-page .heading-actions:before{display:none}
 @media(max-width:400px){.queens-page .main-tabs{gap:0 9px;justify-content:space-between}.queens-page .main-tabs>a{font-size:10px}}
+
+@media(max-width:740px){.queens-page .main-tabs{gap:0}.queens-page .main-tabs>a{gap:0;font-size:11px}}
+@media(max-width:360px){.queens-page .main-tabs>a{font-size:10px}}

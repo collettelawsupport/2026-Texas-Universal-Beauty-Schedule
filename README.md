@@ -9,6 +9,7 @@ A responsive Candyland-themed guide to the October 30–November 1 Texas Our Lit
 - Required/shared events always appear; entered optionals are matched from the roster. Unknown optional selections remain visible with a confirmation note.
 - Watch selections and optional personal profiles are stored only in the current browser. They do not register contestants and do not sync between devices.
 - Personal profiles can be added or edited if the official roster is unavailable or an optional was added at registration.
+- A **Handbook** tab provides the corrected 12-page PDF, topic links, current competition divisions, and separate Livin’ Doll / Sweepstakes divisions.
 - A separate `/queens/` section has shared-password access, day filters, assignment search, report times, wardrobe, and print support.
 - Print the current view or download a calendar file. Calendar export uses the correct Central Time offsets before and after the November 1 DST change. Downloads are snapshots, not calendar subscriptions.
 
@@ -37,7 +38,7 @@ Edit `src/data.js` to update events. Each event has a stable ID. Optional `divis
 
 ## Live roster connection
 
-**The official roster is not connected yet.** No real contestant records are bundled initially. The app displays this clearly and supports personal profiles while access is supplied.
+The app currently publishes the organizer-supplied **Contestant Roster.xlsx** snapshot imported October 13, 2026: 15 contestants, including two Prince entries. The workbook does not include optional entries, so those remain unknown and optional events stay visible with a confirmation note. This snapshot is updated by importing and publishing a new roster; the live Big Forms connection is not configured.
 
 The source repository, [Texas-Beauty-Big-Forms](https://github.com/collettelawsupport/Texas-Beauty-Big-Forms), stores submissions privately and mirrors a workbook to Google Drive. The full workbook contains addresses, contact information, birth dates, family details, financial charges, and private workflow data. Do not publish or commit the workbook, Google credentials, or download passkey.
 
@@ -65,7 +66,7 @@ Use `optionals: null` for unknown entries and `[]` for known no entries. Support
 
 ### Import a sanitized snapshot
 
-Download the private Big Forms workbook to a location outside the repository, then run:
+Save the organizer’s formatted **Contestant Roster** workbook or the private Big Forms workbook outside the repository, then run:
 
 ```sh
 npm run import:roster -- /private/path/texas-our-little-miss-contestants.xlsx
@@ -73,7 +74,15 @@ npm test
 npm run build
 ```
 
+The printable roster importer reads the two first-name / last-name blocks, normalizes age divisions, preserves `program: "prince"`, and derives stable IDs from normalized name and program. It rejects ambiguous duplicate names within a program instead of merging them. Big Forms IDs remain derived from submission IDs; switching sources requires reconciling IDs to preserve existing watch lists.
+
 This saves only approved scheduling fields in `public/data/roster.json`. Review that file before committing and deploying. Snapshot imports do not update automatically; use the live connection for ongoing updates. Do not copy the source workbook into `public/`.
+
+## Handbook
+
+`public/documents/2026-texas-universal-beauty-handbook.pdf` preserves the supplied handbook’s 12 pages and original layout. Page 2 changes only the outdated main competition adult ranges: **21–28 → 21–39** and **29+ → 40+**. The [official honor-roll registration form](https://honorrollregistration.texasourlittlemiss.net/) supplies the eight main divisions and the October 1, 2026 age cutoff. Livin’ Doll (page 6) and Sweepstakes (page 8) retain their separate divisions as confirmed by the organizer. The original supplied files are not modified.
+
+The Handbook tab is rendered by `src/handbook.js`, with the cover image and corrected PDF served as public assets.
 
 ## Hosting
 
