@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import ExcelJS from 'exceljs';
 import { events, competition } from '../src/data.js';
-import { scheduleFor, matchesContestant, calendarFile, eventInstant, parseSaved, escapeHTML } from '../src/logic.js';
+import { scheduleFor, matchesContestant, calendarFile, eventInstant, parseSaved, escapeHTML, contestantName } from '../src/logic.js';
 import { rosterFromWorkbook, sanitizeRoster } from '../netlify/lib/roster.mjs';
 import rosterHandler from '../netlify/functions/roster.mjs';
 const person = optionals => ({ id:'test', name:'Test Contestant', division:'7 - 9 years', optionals });
@@ -21,6 +21,30 @@ test('optionals from multiple watched contestants form one deduplicated family s
  assert.equal(list.length,13); assert.equal(list.filter(e=>e.id==='special-awards').length,1);
 });
 test('unknown optional entries are not silently hidden',()=>assert.equal(scheduleFor([person(null)]).length,13));
+test('optionals-only contestants receive only confirmed stage events, including calendar exports', () => {
+ const c = { ...person(['pro-am', 'optional-talent', 'practice-interview']), participation: 'optionals-only' };
+ const list = scheduleFor([c]);
+ assert.deepEqual(list.map(e => e.id), ['practice', 'pro-am']);
+ assert.equal(contestantName(c), 'Test Contestant*');
+ assert.equal(contestantName(person([])), 'Test Contestant');
+ assert.deepEqual(scheduleFor([{ ...c, optionals: null }]), []);
+ assert.deepEqual(scheduleFor([{ ...c, optionals: [], optionalCoverage: [] }]), []);
+ assert.deepEqual(scheduleFor([{ ...c, optionals: ['livin-doll'] }]).map(e => e.id), ['livin-doll']);
+ const calendar = calendarFile(list, true, [c]);
+ assert.equal(calendar.match(/BEGIN:VEVENT/g).length, 2);
+ assert.match(calendar, /UID:practice-/);
+ assert.match(calendar, /UID:pro-am-/);
+ assert.ok(!/UID:(registration|finals|special-awards|candyland)-/.test(calendar));
+});
+test('mixed watch lists keep official events for competing contestants without assigning them to optionals-only entrants', () => {
+ const optional = { ...person(['pro-am']), participation: 'optionals-only' };
+ const competing = { ...person([]), id: 'competing' };
+ const finals = events.find(e => e.id === 'finals');
+ assert.ok(scheduleFor([optional, competing]).some(e => e.id === 'finals'));
+ assert.equal(matchesContestant(finals, optional), false);
+ assert.equal(matchesContestant(finals, competing), true);
+ assert.equal(matchesContestant({audience:'optional',optional:['pro-am'],divisions:['3 - 6 years']}, optional), false);
+});
 test('division and contestant specific event restrictions are honored',()=> {
  assert.equal(matchesContestant({audience:'all',divisions:['3 - 6 years']},person([])),false);
  assert.equal(matchesContestant({audience:'all',contestantIds:['other']},person([])),false);

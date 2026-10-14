@@ -43,13 +43,14 @@ test('highlighted scorecards import blank colored cells, deduplicate identical r
 });
 
 test('matching middle names preserves watched IDs, names, Prince labels and categories absent from new source', async () => {
-  const original = { ...base, program: 'prince', optionals: ['pro-am', 'practice-interview'], optionalCoverage: ['pro-am', 'practice-interview'] };
+  const original = { ...base, program: 'prince', participation: 'optionals-only', optionals: ['pro-am', 'practice-interview'], optionalCoverage: ['pro-am', 'practice-interview'] };
   const entries = await optionalEntriesFromWorkbook(await workbook());
   const result = mergeOptionalEntries([original, { ...base, id: 'other', name: 'Another Contestant' }], entries);
   assert.equal(result.matched, 1);
   const updated = result.contestants.find(c => c.id === base.id);
   assert.equal(updated.name, base.name);
   assert.equal(updated.program, 'prince');
+  assert.equal(updated.participation, 'optionals-only');
   assert.deepEqual(updated.optionals, ['pro-am', 'livin-doll']);
   assert.equal(updated.optionalDetails, undefined);
   assert.equal(result.contestants.find(c => c.id === 'other').optionals, null);

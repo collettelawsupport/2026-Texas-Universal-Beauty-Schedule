@@ -4,6 +4,7 @@ import ExcelJS from 'exceljs';
 import { readFile } from 'node:fs/promises';
 import { rosterFromWorkbook, sanitizeRoster } from '../netlify/lib/roster.mjs';
 import { divisions } from '../src/data.js';
+import { scheduleFor } from '../src/logic.js';
 
 async function printableRoster({ duplicate = false, adultDivision = '40+ Years', offset = 0 } = {}) {
   const book = new ExcelJS.Workbook();
@@ -47,11 +48,18 @@ test('only the approved Prince marker survives feed sanitation', () => {
   assert.deepEqual(sanitizeRoster({ contestants: [{ ...base, program: '<script>' }] }), [base]);
 });
 
-test('published organizer roster contains the 17 approved contestants and canonical divisions', async () => {
+test('the optionals-only participation marker survives public sanitation', () => {
+  const base = { id: 'optional-only', name: 'Optional Entrant', division: '10 - 12 years', optionals: ['pro-am'] };
+  assert.deepEqual(sanitizeRoster({contestants:[{...base, participation:'optionals-only', email:'private'}]}), [{...base, participation:'optionals-only'}]);
+  for (const participation of ['invalid', true, '<script>']) assert.deepEqual(sanitizeRoster({contestants:[{...base,participation}]}), [base]);
+});
+
+test('published roster contains 17 competition contestants and one approved optionals-only entrant', async () => {
   const data = JSON.parse(await readFile(new URL('../public/data/roster.json', import.meta.url)));
   const roster = sanitizeRoster(data);
   assert.equal(data.source, 'published-snapshot');
-  assert.equal(roster.length, 17);
+  assert.equal(roster.length, 18);
+  assert.equal(roster.filter(c => c.participation !== 'optionals-only').length, 17);
   assert.deepEqual(roster.filter(c => c.program === 'prince').map(c => c.name), ['Paxtyn Pike', 'Silas Elgourbi']);
   assert.ok(roster.every(c => divisions.includes(c.division)));
   const sydni = roster.find(c => c.name === 'Sydni Lee');
@@ -60,5 +68,10 @@ test('published organizer roster contains the 17 approved contestants and canoni
   assert.deepEqual(sydni.optionals, ['optional-talent']);
   assert.equal(brittany.division, '7 - 9 years');
   assert.deepEqual(brittany.optionals, ['practice-interview']);
+  const brynley = roster.find(c => c.name === 'Brynley Buzzard');
+  assert.equal(brynley.division, '10 - 12 years');
+  assert.equal(brynley.participation, 'optionals-only');
+  assert.deepEqual([...brynley.optionals].sort(), ['livin-doll', 'optional-talent', 'practice-interview', 'pro-am']);
+  assert.deepEqual(scheduleFor([brynley]).map(e => e.id), ['practice', 'pro-am', 'livin-doll']);
   assert.ok(!roster.some(c => c.name === 'Allison Nice'));
 });

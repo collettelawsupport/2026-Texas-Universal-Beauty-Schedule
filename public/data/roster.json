@@ -1,6 +1,6 @@
 {
   "source": "published-snapshot",
-  "updatedAt": "2026-10-14T22:51:57.537Z",
+  "updatedAt": "2026-10-14T23:31:37.586Z",
   "contestants": [
     {
       "id": "contestant-7a430f914fcdf0df0f444342",
@@ -47,6 +47,23 @@
         "practice-interview",
         "optional-talent"
       ]
+    },
+    {
+      "id": "contestant-99796932b0b04a123a4f2223",
+      "name": "Brynley Buzzard",
+      "division": "10 - 12 years",
+      "optionals": [
+        "livin-doll",
+        "pro-am",
+        "optional-talent",
+        "practice-interview"
+      ],
+      "optionalDetails": {
+        "optional-talent": [
+          "optional-talent"
+        ]
+      },
+      "participation": "optionals-only"
     },
     {
       "id": "contestant-436d508fe463a35ec9207a2c",

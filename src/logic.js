@@ -1,10 +1,12 @@
 import { events } from './data.js';
 import { optionalStatus, sanitizeOptionalFields } from './optionals.js';
 export const STORE_KEY = 'txolm-schedule-v1';
+export const contestantName = contestant => `${contestant.name}${contestant.participation === 'optionals-only' ? '*' : ''}`;
 export const escapeHTML = value => String(value ?? '').replace(/[&<>"']/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[char]);
 export function matchesContestant(event, contestant) {
   if (event.divisions?.length && !event.divisions.includes(contestant.division)) return false;
   if (event.contestantIds?.length && !event.contestantIds.includes(contestant.id)) return false;
+  if (contestant.participation === 'optionals-only') return event.audience === 'optional' && optionalStatus(event, contestant) === 'entered';
   // Unconfirmed categories stay visible; known non-entries are excluded.
   return optionalStatus(event, contestant) !== 'not-entered';
 }
