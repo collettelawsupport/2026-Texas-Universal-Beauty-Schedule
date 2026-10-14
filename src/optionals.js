@@ -2,8 +2,6 @@ import { optionalCategories } from './data.js';
 
 export const optionalKeys = optionalCategories.map(([key]) => key);
 export const optionalDetailLabels = {
-  'prettiest-best': { eyes: 'Eyes', hair: 'Hair', smile: 'Smile', dress: 'Dress', sportswear: 'Sportswear' },
-  'commercial-print': { headshot: 'Headshot', portfolio: 'Portfolio', 'zed-card': 'Zed Card', 'tear-sheet': 'Tear Sheet' },
   'optional-talent': { 'command-performance': 'Command Performance', 'optional-talent': 'Optional Talent' }
 };
 const approved = values => [...new Set(values.filter(key => optionalKeys.includes(key)))];

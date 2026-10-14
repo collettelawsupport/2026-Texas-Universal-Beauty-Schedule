@@ -1,5 +1,5 @@
 import { events } from './data.js';
-import { optionalStatus } from './optionals.js';
+import { optionalStatus, sanitizeOptionalFields } from './optionals.js';
 export const STORE_KEY = 'txolm-schedule-v1';
 export const escapeHTML = value => String(value ?? '').replace(/[&<>"']/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[char]);
 export function matchesContestant(event, contestant) {
@@ -19,7 +19,7 @@ export function parseSaved(raw) {
     const value = JSON.parse(raw);
     return {
       watched: Array.isArray(value?.watched) ? value.watched.filter(x => typeof x === 'string').slice(0, 200) : [],
-      personal: Array.isArray(value?.personal) ? value.personal.filter(x => typeof x.id === 'string' && x.id.startsWith('personal-') && typeof x.name === 'string' && typeof x.division === 'string' && Array.isArray(x.optionals)).slice(0, 100) : []
+      personal: Array.isArray(value?.personal) ? value.personal.filter(x => typeof x.id === 'string' && x.id.startsWith('personal-') && typeof x.name === 'string' && typeof x.division === 'string' && Array.isArray(x.optionals)).slice(0, 100).map(c => ({ id: c.id, name: c.name, division: c.division, ...sanitizeOptionalFields(c) })) : []
     };
   } catch { return { watched: [], personal: [] }; }
 }

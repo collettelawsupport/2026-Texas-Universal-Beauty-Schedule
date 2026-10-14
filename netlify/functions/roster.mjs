@@ -31,7 +31,7 @@ export default async function handler(request) {
       if (!response.ok) throw new Error('Workbook unavailable');
       contestants = await rosterFromWorkbook(await bodyWithLimit(response));
     }
-    // Only these four scheduling fields cross the public boundary. The workbook is never returned.
+    // Only approved identity and stage-optional fields cross the public boundary.
     return Response.json({ updatedAt: new Date().toISOString(), contestants }, { headers: { ...headers, 'cache-control': 'public, max-age=60', 'netlify-cdn-cache-control': 'public, s-maxage=300, stale-while-revalidate=300' } });
   } catch {
     // Do not log private responses, source URLs, or credentials.

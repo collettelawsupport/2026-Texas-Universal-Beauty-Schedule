@@ -4,9 +4,7 @@ import { divisions } from '../../src/data.js';
 import { sanitizeOptionalFields } from '../../src/optionals.js';
 const fieldMap = [
   [/^Practice Interview \(/, 'practice-interview'], [/^Pro Am Modeling/, 'pro-am'],
-  [/^Optional Talent \(/, 'optional-talent'], [/^Livin.? Doll \(/, 'livin-doll'],
-  [/^Miss Photogenic/, 'photogenic'], [/^Commercial Print \(/, 'commercial-print'],
-  [/^Prettiest and Bests/, 'prettiest-best']
+  [/^(?:Optional Talent|Command Performance) \(/, 'optional-talent'], [/^Livin.? Doll \(/, 'livin-doll']
 ];
 function text(cell) { return cell.value == null ? '' : cell.text.trim(); }
 export function hasEntry(value) {
@@ -67,10 +65,6 @@ export async function rosterFromWorkbook(bytes) {
       const response = text(row.getCell(2));
       for (const [pattern, key] of fieldMap) {
         if (pattern.test(label)) { if (response) known.add(key); if (hasEntry(response)) entered.add(key); }
-      }
-      if (/^\$20 COUPON/.test(label) && hasEntry(response)) {
-        if (/Prettiest/i.test(response)) entered.add('prettiest-best');
-        if (/Commercial/i.test(response)) entered.add('commercial-print');
       }
     });
     contestants.push({

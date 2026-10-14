@@ -38,7 +38,7 @@ Edit `src/data.js` to update events. Each event has a stable ID. Optional `divis
 
 ## Live roster connection
 
-The app currently publishes the organizer-supplied **Contestant Roster.xlsx** snapshot imported October 13, 2026: 15 contestants, including two Prince entries. A separate highlighted optional-entry workbook now supplies entries for 10 matched contestants. It covers Livin’ Doll, Practice Interview, Optional Talent, Prettiest & Best, and Commercial Print. Unknown categories and the five contestants absent from that workbook retain confirmation notes. Confirmed non-entries are excluded from personalized events; the full schedule stays complete. This snapshot is updated by importing and publishing a new roster; the live Big Forms connection is not configured.
+The app currently publishes the organizer-supplied **Contestant Roster.xlsx** snapshot imported October 13, 2026: 15 contestants, including two Prince entries. A separate highlighted optional-entry workbook now supplies entries for 10 matched contestants. Only stage entries are published: Livin’ Doll, Practice Interview, and Optional Talent / Command. ProAm enrollment is supported as one category but is not supplied in this scorecard workbook. Unknown categories and the five contestants absent from that workbook retain confirmation notes. Confirmed non-entries are excluded from personalized events; the full schedule stays complete. This snapshot is updated by importing and publishing a new roster; the live Big Forms connection is not configured.
 
 The source repository, [Texas-Beauty-Big-Forms](https://github.com/collettelawsupport/Texas-Beauty-Big-Forms), stores submissions privately and mirrors a workbook to Google Drive. The full workbook contains addresses, contact information, birth dates, family details, financial charges, and private workflow data. Do not publish or commit the workbook, Google credentials, or download passkey.
 
@@ -62,7 +62,7 @@ Redeploy after setting environment variables. The Netlify CDN caches successful 
 }
 ```
 
-Use `optionals: null` for unknown entries and `[]` for known no entries. Supported keys: `practice-interview`, `pro-am`, `optional-talent`, `livin-doll`, `photogenic`, `commercial-print`, `prettiest-best`, and `other-optional`. The Big Forms importer includes free coupon entries and ignores decline/deferred-entry answers. IDs are derived from the source submission ID without exposing it, so two contestants with the same name remain separate.
+Use `optionals: null` for unknown entries and `[]` for known no entries. The public allowlist is limited to `practice-interview`, `pro-am`, `optional-talent`, and `livin-doll`. ProAm is a single enrollment flag regardless of the number or type of entries. Prettiest & Best, Commercial Print, Photogenic, and other non-stage entries are excluded from the snapshot, API, build output, profile editor, saved profiles, and future imports. The Big Forms importer ignores decline/deferred-entry answers and non-stage coupon selections. IDs are derived from the source submission ID without exposing it, so two contestants with the same name remain separate.
 
 ### Import a sanitized snapshot
 
@@ -84,11 +84,11 @@ This saves only approved scheduling fields in `public/data/roster.json`. Review 
 npm run import:optionals -- /private/path/optionals.xlsx
 ```
 
-This merges highlighted cells from the organizer’s five optional scorecards into the existing roster. Blank uncolored entry cells on a named row mean no entry for that category. Blank rows, score/winner fields, comments, and private notes are not published. Identical duplicate rows are combined; conflicting duplicates stop the import. The importer validates sheet headers and expected highlight colors instead of treating every listed name as enrolled.
+This merges highlighted cells from the organizer’s three stage scorecards into the existing roster. Non-stage sheets are ignored entirely. Blank uncolored entry cells on a named row mean no entry for that category. Blank rows, score/winner fields, comments, and private notes are not published. Identical duplicate rows are combined; conflicting duplicates stop the import. The importer validates sheet headers and expected highlight colors instead of treating every listed name as enrolled.
 
 Existing contestant IDs, display names, divisions, and Prince labels are preserved. Names match by division and full name or first/last name when middle names differ; the supplied `Silas` abbreviation explicitly maps to `Silas Elgourbi`. Ambiguous matches fail. Unmatched people are reported and not added by default. Only use `--add-unmatched` after reviewing the new names with the organizer. The October import leaves Sydni Lee, Allison Nice, and Brittany Skye Pike unmatched to the current official roster.
 
-`optionals` lists confirmed entries. `optionalCoverage` lists categories for which both entries and non-entries are known; omitted coverage retains the original complete-array behavior. `optionalDetails` contains allowlisted subcategory keys only. ProAm, Photogenic, and other optional awards remain unknown because they are absent from this workbook. Unknown events stay visible with confirmation notes in the app and personal calendar downloads. Run tests and review the snapshot before publishing.
+`optionals` lists confirmed entries. `optionalCoverage` lists categories for which both entries and non-entries are known; omitted coverage retains the original complete-array behavior. `optionalDetails` may distinguish Optional Talent from Command Performance only; individual ProAm categories are never published. ProAm remains unknown because it is absent from this workbook. Unknown events stay visible with confirmation notes in the app and personal calendar downloads. Run tests and review the snapshot before publishing.
 
 A fresh `import:roster` replaces the snapshot; reapply optional entries after a new roster import and reconcile identities before switching roster sources.
 

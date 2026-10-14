@@ -5,7 +5,7 @@ import { readFile } from 'node:fs/promises';
 import { optionalEntriesFromWorkbook, mergeOptionalEntries } from '../scripts/lib/optional-entries.mjs';
 import { optionalStatus, optionalEntryLabels, sanitizeOptionalFields } from '../src/optionals.js';
 import { scheduleFor, calendarFile, matchesContestant } from '../src/logic.js';
-import { events } from '../src/data.js';
+import { events, optionalCategories } from '../src/data.js';
 
 const base = { id: 'existing-stable-id', name: 'Example Contestant', division: '3 - 6 years', optionals: null };
 async function workbook({ duplicateConflict = false } = {}) {
@@ -37,21 +37,21 @@ test('highlighted scorecards import blank colored cells, deduplicate identical r
   assert.equal(entries.length, 1);
   assert.deepEqual(entries[0].selections['livin-doll'], { entered: true, details: [] });
   assert.deepEqual(entries[0].selections['practice-interview'], { entered: false, details: [] });
-  assert.deepEqual(entries[0].selections['prettiest-best'], { entered: true, details: ['eyes'] });
+  assert.equal(entries[0].selections['prettiest-best'], undefined);
   assert.ok(!JSON.stringify(entries).includes('Private'));
   await assert.rejects(optionalEntriesFromWorkbook(await workbook({ duplicateConflict: true })), /Conflicting duplicate/);
 });
 
 test('matching middle names preserves watched IDs, names, Prince labels and categories absent from new source', async () => {
-  const original = { ...base, program: 'prince', optionals: ['photogenic', 'practice-interview'], optionalCoverage: ['photogenic', 'practice-interview'] };
+  const original = { ...base, program: 'prince', optionals: ['pro-am', 'practice-interview'], optionalCoverage: ['pro-am', 'practice-interview'] };
   const entries = await optionalEntriesFromWorkbook(await workbook());
   const result = mergeOptionalEntries([original, { ...base, id: 'other', name: 'Another Contestant' }], entries);
   assert.equal(result.matched, 1);
   const updated = result.contestants.find(c => c.id === base.id);
   assert.equal(updated.name, base.name);
   assert.equal(updated.program, 'prince');
-  assert.deepEqual(updated.optionals, ['photogenic', 'livin-doll', 'prettiest-best']);
-  assert.deepEqual(updated.optionalDetails, { 'prettiest-best': ['eyes'] });
+  assert.deepEqual(updated.optionals, ['pro-am', 'livin-doll']);
+  assert.equal(updated.optionalDetails, undefined);
   assert.equal(result.contestants.find(c => c.id === 'other').optionals, null);
 });
 
@@ -64,10 +64,10 @@ test('unmatched and ambiguous people are not silently assigned to existing conte
 });
 
 test('partial coverage hides known non-entries but keeps unknown combined event entries marked', () => {
-  const c = { ...base, optionals: ['prettiest-best'], optionalCoverage: ['practice-interview', 'optional-talent', 'livin-doll', 'prettiest-best', 'commercial-print'] };
+  const c = { ...base, optionals: [], optionalCoverage: ['practice-interview', 'optional-talent', 'livin-doll'] };
   assert.equal(optionalStatus(events.find(e => e.id === 'practice'), c), 'not-entered');
   assert.equal(optionalStatus(events.find(e => e.id === 'pro-am'), c), 'unknown');
-  assert.equal(optionalStatus(events.find(e => e.id === 'special-awards'), c), 'entered');
+  assert.equal(optionalStatus(events.find(e => e.id === 'special-awards'), c), 'unknown');
   const schedule = scheduleFor([c]);
   assert.ok(!schedule.some(e => ['practice', 'livin-doll'].includes(e.id)));
   assert.ok(schedule.some(e => e.id === 'finals'));
@@ -81,19 +81,29 @@ test('partial coverage hides known non-entries but keeps unknown combined event 
   assert.equal(matchesContestant(events.find(e => e.id === 'practice'), { ...c, optionals: null }), true);
 });
 
-test('partial scheduling fields expose only approved category and subcategory keys', () => {
-  const result = sanitizeOptionalFields({ optionals: ['prettiest-best'], optionalCoverage: ['prettiest-best', 'private'], optionalDetails: { 'prettiest-best': ['hair', 'private'], private: ['secret'] } });
-  assert.deepEqual(result, { optionals: ['prettiest-best'], optionalCoverage: ['prettiest-best'], optionalDetails: { 'prettiest-best': ['hair'] } });
-  assert.deepEqual(optionalEntryLabels(result), ['Prettiest & Bests: Hair']);
+test('public optional fields discard all non-stage enrollment and individual ProAm detail', () => {
+  const result = sanitizeOptionalFields({
+    optionals: ['pro-am', 'pro-am', 'optional-talent', 'prettiest-best', 'commercial-print', 'photogenic', 'other-optional'],
+    optionalCoverage: ['pro-am', 'optional-talent', 'prettiest-best', 'commercial-print', 'private'],
+    optionalDetails: { 'pro-am': ['sportswear', 'western'], 'optional-talent': ['command-performance', 'private'], 'prettiest-best': ['hair'], 'commercial-print': ['headshot'] }
+  });
+  assert.deepEqual(result, { optionals: ['pro-am', 'optional-talent'], optionalCoverage: ['pro-am', 'optional-talent'], optionalDetails: { 'optional-talent': ['command-performance'] } });
+  assert.deepEqual(optionalEntryLabels(result), ['ProAm Modeling', 'Optional Talent / Command: Command Performance']);
+  assert.deepEqual(optionalCategories.map(([key]) => key), ['practice-interview', 'pro-am', 'optional-talent', 'livin-doll']);
+  const nonStageOnly = { ...base, optionals: ['prettiest-best', 'commercial-print'] };
+  assert.deepEqual(optionalEntryLabels(nonStageOnly), []);
+  assert.equal(scheduleFor([nonStageOnly]).length, 9);
 });
 
 test('published selections match representative source highlights without replacing roster identities', async () => {
   const { contestants } = JSON.parse(await readFile(new URL('../public/data/roster.json', import.meta.url)));
   const find = name => contestants.find(c => c.name === name);
-  assert.deepEqual(find('Penelope Pike').optionals, ['prettiest-best', 'practice-interview']);
-  assert.deepEqual(find('Penelope Pike').optionalDetails, { 'prettiest-best': ['hair'] });
-  assert.deepEqual(find('Jesse Finch').optionals, ['livin-doll', 'prettiest-best']);
-  assert.deepEqual(find('Jasmine Romero').optionalDetails, { 'commercial-print': ['portfolio'], 'optional-talent': ['optional-talent'] });
+  assert.deepEqual(find('Penelope Pike').optionals, ['practice-interview']);
+  assert.equal(find('Penelope Pike').optionalDetails, undefined);
+  assert.deepEqual(find('Jesse Finch').optionals, ['livin-doll']);
+  assert.deepEqual(find('Jasmine Romero').optionalDetails, { 'optional-talent': ['optional-talent'] });
+  assert.ok(!/prettiest|commercial|photogenic|other-optional|headshot|portfolio/.test(JSON.stringify(contestants)));
+  assert.ok(contestants.every(c => JSON.stringify(sanitizeOptionalFields(c)) === JSON.stringify(Object.fromEntries(Object.entries(c).filter(([key]) => ['optionals', 'optionalCoverage', 'optionalDetails'].includes(key))))));
   assert.equal(find('Silas Elgourbi').program, 'prince');
   assert.equal(find('Silas Elgourbi').id, 'contestant-4f11d749e8f5c260169bd526');
   assert.equal(find('Paxtyn Pike').optionals, null);

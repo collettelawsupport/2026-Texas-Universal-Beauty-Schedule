@@ -45,19 +45,19 @@ async function exampleWorkbook(missingField=false) {
  sheet.getCell('A2').value='Contestant';sheet.getCell('B2').value='Test Contestant';sheet.getCell('A3').value='Division';sheet.getCell('B3').value='7 - 9 years';sheet.getCell('A5').value='Submission ID';sheet.getCell('B5').value='private-source-id';
  sheet.addRow(['Field','Response']);sheet.addRow(['Email','private@example.test']);sheet.addRow(['Address','Never expose this']);
  sheet.addRow(['Practice Interview (Close-Up Appraisal)','• I am not entering Practice Close Up or will add this optional at the door']);
- sheet.addRow(['Pro Am Modeling — Highly Recommended','• Sportswear / Casual Wear\n• I am not entering Pro Am Modeling or will add this optional at the door']);
- sheet.addRow(['Optional Talent (All age divisions not requiring talent)','• I am not entering optional talent/command performance or will add this optional at the door']);
+ sheet.addRow(['Pro Am Modeling — Highly Recommended','• Sportswear / Casual Wear\n• Western Wear\n• I am not entering Pro Am Modeling or will add this optional at the door']);
+ if(!missingField)sheet.addRow(['Optional Talent (All age divisions not requiring talent)','• I am not entering optional talent/command performance or will add this optional at the door']);
  sheet.addRow(['Livin’ Doll (Highly Recommended)','State Contestant = $50']);
- if(!missingField)sheet.addRow(['Miss Photogenic — Photo Due by 10/05/26','I am not entering Miss Photogenic']);
+ sheet.addRow(['Miss Photogenic — Photo Due by 10/05/26','I am not entering Miss Photogenic']);
  sheet.addRow(['Commercial Print (Check all that apply)','• I am not entering Commercial Print or will add this optional at registration']);
  sheet.addRow(['Prettiest and Bests (check each one you want to enter)','• I am not entering any Prettiest and Bests or will add this optional at the door']);
  sheet.addRow(['$20 COUPON — What optional would you like to select for free?','Commercial Headshot']);
  return book.xlsx.writeBuffer();
 }
-test('Big Forms workbook import excludes private fields, declined entries and includes coupon entry',async()=> {
+test('Big Forms import publishes only stage enrollment, combines ProAm entries, and excludes non-stage coupons',async()=> {
  const list=await rosterFromWorkbook(await exampleWorkbook());
  assert.equal(list.length,1);assert.deepEqual(Object.keys(list[0]),['id','name','division','optionals']);
- assert.deepEqual(list[0].optionals,['pro-am','livin-doll','commercial-print']);
+ assert.deepEqual(list[0].optionals,['pro-am','livin-doll']);
  assert.ok(!JSON.stringify(list).includes('private'));assert.ok(!JSON.stringify(list).includes('Never expose'));
  assert.equal((await rosterFromWorkbook(await exampleWorkbook()))[0].id,list[0].id);
 });
@@ -79,11 +79,18 @@ test('roster endpoint only returns approved fields and suppresses upstream failu
  globalThis.Netlify={env:{get:key=>key==='ROSTER_FEED_URL'?'https://example.test/approved-feed':undefined}};
  const originalFetch=globalThis.fetch;
  try {
-  globalThis.fetch=async()=>Response.json({contestants:[{...person(['pro-am']),phone:'private'}]});
+  globalThis.fetch=async()=>Response.json({contestants:[{...person(['pro-am','prettiest-best','commercial-print','photogenic']),phone:'private',optionalDetails:{'commercial-print':['headshot'],'prettiest-best':['hair'],'pro-am':['western']}}]});
   const response=await rosterHandler(new Request('https://example.test/api/roster'));
   assert.equal(response.status,200);assert.deepEqual((await response.json()).contestants,[person(['pro-am'])]);
   globalThis.fetch=async()=>{throw new Error('secret connection detail');};
   const error=await rosterHandler(new Request('https://example.test/api/roster'));
   assert.equal(error.status,502);assert.ok(!(await error.text()).includes('secret'));
  } finally {globalThis.fetch=originalFetch;}
+});
+
+test('older personal profiles are cleaned while saved watch IDs are retained', () => {
+ const profile={id:'personal-old',name:'Example',division:'7 - 9 years',optionals:['pro-am','prettiest-best','commercial-print'],optionalDetails:{'prettiest-best':['eyes'],'pro-am':['western']}};
+ const saved=parseSaved(JSON.stringify({watched:['contestant-existing','personal-old'],personal:[profile]}));
+ assert.deepEqual(saved.watched,['contestant-existing','personal-old']);
+ assert.deepEqual(saved.personal,[{id:profile.id,name:profile.name,division:profile.division,optionals:['pro-am']}]);
 });

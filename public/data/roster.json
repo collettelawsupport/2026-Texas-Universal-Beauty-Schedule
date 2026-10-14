@@ -1,27 +1,19 @@
 {
   "source": "published-snapshot",
-  "updatedAt": "2026-10-14T03:36:10.594Z",
+  "updatedAt": "2026-10-14T22:35:43.446Z",
   "contestants": [
     {
       "id": "contestant-7a430f914fcdf0df0f444342",
       "name": "Analisa Hernandez",
       "division": "7 - 9 years",
       "optionals": [
-        "prettiest-best",
         "practice-interview"
       ],
       "optionalCoverage": [
         "livin-doll",
-        "prettiest-best",
-        "commercial-print",
         "practice-interview",
         "optional-talent"
-      ],
-      "optionalDetails": {
-        "prettiest-best": [
-          "hair"
-        ]
-      }
+      ]
     },
     {
       "id": "contestant-d0db144587f37d862bece431",
@@ -29,21 +21,13 @@
       "division": "10 - 12 years",
       "optionals": [
         "livin-doll",
-        "prettiest-best",
         "practice-interview"
       ],
       "optionalCoverage": [
         "livin-doll",
-        "prettiest-best",
-        "commercial-print",
         "practice-interview",
         "optional-talent"
-      ],
-      "optionalDetails": {
-        "prettiest-best": [
-          "dress"
-        ]
-      }
+      ]
     },
     {
       "id": "contestant-d3d52342cdeb2120ff2df9ed",
@@ -57,21 +41,13 @@
       "division": "10 - 12 years",
       "optionals": [
         "livin-doll",
-        "prettiest-best",
         "practice-interview"
       ],
       "optionalCoverage": [
         "livin-doll",
-        "prettiest-best",
-        "commercial-print",
         "practice-interview",
         "optional-talent"
-      ],
-      "optionalDetails": {
-        "prettiest-best": [
-          "dress"
-        ]
-      }
+      ]
     },
     {
       "id": "contestant-57110e45991c9c02b7fca42f",
@@ -85,21 +61,15 @@
       "division": "7 - 9 years",
       "optionals": [
         "livin-doll",
-        "commercial-print",
         "practice-interview",
         "optional-talent"
       ],
       "optionalCoverage": [
         "livin-doll",
-        "prettiest-best",
-        "commercial-print",
         "practice-interview",
         "optional-talent"
       ],
       "optionalDetails": {
-        "commercial-print": [
-          "portfolio"
-        ],
         "optional-talent": [
           "optional-talent"
         ]
@@ -110,21 +80,13 @@
       "name": "Jesse Finch",
       "division": "0 - 2 years",
       "optionals": [
-        "livin-doll",
-        "prettiest-best"
+        "livin-doll"
       ],
       "optionalCoverage": [
         "livin-doll",
-        "prettiest-best",
-        "commercial-print",
         "practice-interview",
         "optional-talent"
-      ],
-      "optionalDetails": {
-        "prettiest-best": [
-          "eyes"
-        ]
-      }
+      ]
     },
     {
       "id": "contestant-fd6c86e6c86b274b25cce972",
@@ -132,23 +94,15 @@
       "division": "3 - 6 years",
       "optionals": [
         "livin-doll",
-        "prettiest-best",
         "practice-interview",
         "optional-talent"
       ],
       "optionalCoverage": [
         "livin-doll",
-        "prettiest-best",
-        "commercial-print",
         "practice-interview",
         "optional-talent"
       ],
       "optionalDetails": {
-        "prettiest-best": [
-          "eyes",
-          "hair",
-          "smile"
-        ],
         "optional-talent": [
           "optional-talent"
         ]
@@ -165,21 +119,13 @@
       "name": "Misty Davis",
       "division": "40 + years",
       "optionals": [
-        "livin-doll",
-        "prettiest-best"
+        "livin-doll"
       ],
       "optionalCoverage": [
         "livin-doll",
-        "prettiest-best",
-        "commercial-print",
         "practice-interview",
         "optional-talent"
-      ],
-      "optionalDetails": {
-        "prettiest-best": [
-          "dress"
-        ]
-      }
+      ]
     },
     {
       "id": "contestant-efe45ed63f1e80df1a248d1f",
@@ -193,54 +139,27 @@
       "name": "Penelope Pike",
       "division": "3 - 6 years",
       "optionals": [
-        "prettiest-best",
         "practice-interview"
       ],
       "optionalCoverage": [
         "livin-doll",
-        "prettiest-best",
-        "commercial-print",
         "practice-interview",
         "optional-talent"
-      ],
-      "optionalDetails": {
-        "prettiest-best": [
-          "hair"
-        ]
-      }
+      ]
     },
     {
       "id": "contestant-4f11d749e8f5c260169bd526",
       "name": "Silas Elgourbi",
       "division": "0 - 2 years",
       "optionals": [
-        "livin-doll",
-        "prettiest-best",
-        "commercial-print"
+        "livin-doll"
       ],
-      "program": "prince",
       "optionalCoverage": [
         "livin-doll",
-        "prettiest-best",
-        "commercial-print",
         "practice-interview",
         "optional-talent"
       ],
-      "optionalDetails": {
-        "prettiest-best": [
-          "eyes",
-          "hair",
-          "smile",
-          "dress",
-          "sportswear"
-        ],
-        "commercial-print": [
-          "headshot",
-          "portfolio",
-          "zed-card",
-          "tear-sheet"
-        ]
-      }
+      "program": "prince"
     },
     {
       "id": "contestant-b9e4d56dccc44a41d2cc129e",
@@ -254,32 +173,15 @@
       "division": "3 - 6 years",
       "optionals": [
         "livin-doll",
-        "prettiest-best",
-        "commercial-print",
         "practice-interview",
         "optional-talent"
       ],
       "optionalCoverage": [
         "livin-doll",
-        "prettiest-best",
-        "commercial-print",
         "practice-interview",
         "optional-talent"
       ],
       "optionalDetails": {
-        "prettiest-best": [
-          "eyes",
-          "hair",
-          "smile",
-          "dress",
-          "sportswear"
-        ],
-        "commercial-print": [
-          "headshot",
-          "portfolio",
-          "zed-card",
-          "tear-sheet"
-        ],
         "optional-talent": [
           "optional-talent"
         ]

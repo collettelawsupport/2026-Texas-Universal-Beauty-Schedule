@@ -6,8 +6,6 @@ import { sanitizeRoster } from '../../netlify/lib/roster.mjs';
 
 const sheets = [
   { name: 'Living Doll', category: 'livin-doll', columns: [['Entered', null]], color: 'FFFFC000' },
-  { name: 'Prettiest & Best', category: 'prettiest-best', columns: [['Eyes', 'eyes'], ['Hair', 'hair'], ['Smile', 'smile'], ['Dress', 'dress'], ['Sportswear', 'sportswear']], color: 'FFF4B183' },
-  { name: 'Commercial Print', category: 'commercial-print', columns: [['Headshot', 'headshot'], ['Portfolio', 'portfolio'], ['Zed Card', 'zed-card'], ['Tear Sheet', 'tear-sheet']], color: 'FFC6E0B4' },
   { name: 'Practice Interview', category: 'practice-interview', columns: [['Entered', null]], color: 'FFFFC000' },
   { name: 'Command_Optional Talent', category: 'optional-talent', columns: [['Command Performance', 'command-performance'], ['Optional Talent', 'optional-talent']], color: 'FFF4B183' }
 ];
