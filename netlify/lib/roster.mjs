@@ -1,7 +1,7 @@
 import { createHash } from 'node:crypto';
 import ExcelJS from 'exceljs';
 import { divisions } from '../../src/data.js';
-const categories = ['practice-interview', 'pro-am', 'optional-talent', 'livin-doll', 'photogenic', 'commercial-print', 'prettiest-best', 'other-optional'];
+import { sanitizeOptionalFields } from '../../src/optionals.js';
 const fieldMap = [
   [/^Practice Interview \(/, 'practice-interview'], [/^Pro Am Modeling/, 'pro-am'],
   [/^Optional Talent \(/, 'optional-talent'], [/^Livin.? Doll \(/, 'livin-doll'],
@@ -19,7 +19,7 @@ export function sanitizeRoster(payload) {
     if (typeof c.id !== 'string' || !c.id || c.id.startsWith('personal-') || typeof c.name !== 'string' || !c.name.trim() || typeof c.division !== 'string') throw new Error('Invalid contestant record');
     if (seen.has(c.id)) throw new Error('Duplicate contestant ID');
     seen.add(c.id);
-    return { id: c.id.slice(0, 100), name: c.name.trim().slice(0, 100), division: c.division.trim().slice(0, 80), optionals: Array.isArray(c.optionals) ? [...new Set(c.optionals.filter(v => categories.includes(v)))] : null, ...(c.program === 'prince' ? { program: 'prince' } : {}) };
+    return { id: c.id.slice(0, 100), name: c.name.trim().slice(0, 100), division: c.division.trim().slice(0, 80), ...sanitizeOptionalFields(c), ...(c.program === 'prince' ? { program: 'prince' } : {}) };
   });
 }
 function publishedRoster(sheet) {

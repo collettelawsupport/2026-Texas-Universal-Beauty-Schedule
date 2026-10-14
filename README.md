@@ -38,7 +38,7 @@ Edit `src/data.js` to update events. Each event has a stable ID. Optional `divis
 
 ## Live roster connection
 
-The app currently publishes the organizer-supplied **Contestant Roster.xlsx** snapshot imported October 13, 2026: 15 contestants, including two Prince entries. The workbook does not include optional entries, so those remain unknown and optional events stay visible with a confirmation note. This snapshot is updated by importing and publishing a new roster; the live Big Forms connection is not configured.
+The app currently publishes the organizer-supplied **Contestant Roster.xlsx** snapshot imported October 13, 2026: 15 contestants, including two Prince entries. A separate highlighted optional-entry workbook now supplies entries for 10 matched contestants. It covers Livin’ Doll, Practice Interview, Optional Talent, Prettiest & Best, and Commercial Print. Unknown categories and the five contestants absent from that workbook retain confirmation notes. Confirmed non-entries are excluded from personalized events; the full schedule stays complete. This snapshot is updated by importing and publishing a new roster; the live Big Forms connection is not configured.
 
 The source repository, [Texas-Beauty-Big-Forms](https://github.com/collettelawsupport/Texas-Beauty-Big-Forms), stores submissions privately and mirrors a workbook to Google Drive. The full workbook contains addresses, contact information, birth dates, family details, financial charges, and private workflow data. Do not publish or commit the workbook, Google credentials, or download passkey.
 
@@ -77,6 +77,20 @@ npm run build
 The printable roster importer reads the two first-name / last-name blocks, normalizes age divisions, preserves `program: "prince"`, and derives stable IDs from normalized name and program. It rejects ambiguous duplicate names within a program instead of merging them. Big Forms IDs remain derived from submission IDs; switching sources requires reconciling IDs to preserve existing watch lists.
 
 This saves only approved scheduling fields in `public/data/roster.json`. Review that file before committing and deploying. Snapshot imports do not update automatically; use the live connection for ongoing updates. Do not copy the source workbook into `public/`.
+
+### Attach optional-entry scorecards
+
+```sh
+npm run import:optionals -- /private/path/optionals.xlsx
+```
+
+This merges highlighted cells from the organizer’s five optional scorecards into the existing roster. Blank uncolored entry cells on a named row mean no entry for that category. Blank rows, score/winner fields, comments, and private notes are not published. Identical duplicate rows are combined; conflicting duplicates stop the import. The importer validates sheet headers and expected highlight colors instead of treating every listed name as enrolled.
+
+Existing contestant IDs, display names, divisions, and Prince labels are preserved. Names match by division and full name or first/last name when middle names differ; the supplied `Silas` abbreviation explicitly maps to `Silas Elgourbi`. Ambiguous matches fail. Unmatched people are reported and not added by default. Only use `--add-unmatched` after reviewing the new names with the organizer. The October import leaves Sydni Lee, Allison Nice, and Brittany Skye Pike unmatched to the current official roster.
+
+`optionals` lists confirmed entries. `optionalCoverage` lists categories for which both entries and non-entries are known; omitted coverage retains the original complete-array behavior. `optionalDetails` contains allowlisted subcategory keys only. ProAm, Photogenic, and other optional awards remain unknown because they are absent from this workbook. Unknown events stay visible with confirmation notes in the app and personal calendar downloads. Run tests and review the snapshot before publishing.
+
+A fresh `import:roster` replaces the snapshot; reapply optional entries after a new roster import and reconcile identities before switching roster sources.
 
 ## Handbook
 

@@ -53,5 +53,5 @@ test('published organizer roster contains the 15 supplied contestants and canoni
   assert.equal(data.source, 'published-snapshot');
   assert.equal(roster.length, 15);
   assert.deepEqual(roster.filter(c => c.program === 'prince').map(c => c.name), ['Paxtyn Pike', 'Silas Elgourbi']);
-  assert.ok(roster.every(c => divisions.includes(c.division) && c.optionals === null));
+  assert.ok(roster.every(c => divisions.includes(c.division)));
 });

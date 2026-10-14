@@ -1,14 +1,12 @@
 import { events } from './data.js';
+import { optionalStatus } from './optionals.js';
 export const STORE_KEY = 'txolm-schedule-v1';
 export const escapeHTML = value => String(value ?? '').replace(/[&<>"']/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[char]);
 export function matchesContestant(event, contestant) {
   if (event.divisions?.length && !event.divisions.includes(contestant.division)) return false;
   if (event.contestantIds?.length && !event.contestantIds.includes(contestant.id)) return false;
-  if (event.audience === 'all') return true;
-  // Unknown entries stay visible and explicitly marked for confirmation.
-  if (!Array.isArray(contestant.optionals)) return true;
-  if (event.audience === 'any-optional') return contestant.optionals.length > 0;
-  return event.optional?.some(key => contestant.optionals.includes(key)) ?? false;
+  // Unconfirmed categories stay visible; known non-entries are excluded.
+  return optionalStatus(event, contestant) !== 'not-entered';
 }
 export const scheduleFor = contestants => events.filter(event => contestants.some(c => matchesContestant(event, c)));
 export function timeLabel(time) {
@@ -29,14 +27,16 @@ export function eventInstant(event, field = 'start') {
   // The competition crosses the 2026 daylight-saving transition. Sunday is CST.
   return new Date(`${event.date}T${event[field] || event.start}:00${event.date >= '2026-11-01' ? '-06:00' : '-05:00'}`);
 }
-export function calendarFile(selectedEvents, confirmed) {
+export function calendarFile(selectedEvents, confirmed, contestants = []) {
   const escape = text => String(text).replace(/\\/g, '\\\\').replace(/\n/g, '\\n').replace(/;/g, '\\;').replace(/,/g, '\\,');
   const stamp = date => date.toISOString().replace(/[-:]/g, '').replace('.000', '');
   const fold = line => { const pieces = []; let part = ''; for (const char of line) { if (new TextEncoder().encode(part + char).length > 73) { pieces.push(part); part = ' '; } part += char; } pieces.push(part); return pieces.join('\r\n'); };
   const lines = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Texas OLM//2026 Schedule//EN', 'CALSCALE:GREGORIAN'];
   for (const event of selectedEvents.filter(e => confirmed || !e.timeNeedsConfirmation)) {
     const end = event.end ? eventInstant(event, 'end') : new Date(eventInstant(event).getTime() + 15 * 60000);
-    lines.push('BEGIN:VEVENT', `UID:${event.id}-2026@texasolm.schedule`, `DTSTAMP:${stamp(new Date())}`, `DTSTART:${stamp(eventInstant(event))}`, `DTEND:${stamp(end)}`, `SUMMARY:${escape(event.title)}`, 'LOCATION:Texas A&M Hotel and Convention Center', `DESCRIPTION:${escape(event.details + ('checkin' in event ? '\nCheck-in: ' + (event.checkin ? timeLabel(event.checkin) : 'Time to be announced. Check the live schedule.') : ''))}`, 'END:VEVENT');
+    const pending = contestants.filter(c => matchesContestant(event, c) && optionalStatus(event, c) === 'unknown');
+    const entryNote = pending.length ? `\nEntry not confirmed: ${pending.map(c => c.name).join(', ')}. Check the live schedule for updates.` : '';
+    lines.push('BEGIN:VEVENT', `UID:${event.id}-2026@texasolm.schedule`, `DTSTAMP:${stamp(new Date())}`, `DTSTART:${stamp(eventInstant(event))}`, `DTEND:${stamp(end)}`, `SUMMARY:${escape(event.title)}`, 'LOCATION:Texas A&M Hotel and Convention Center', `DESCRIPTION:${escape(event.details + ('checkin' in event ? '\nCheck-in: ' + (event.checkin ? timeLabel(event.checkin) : 'Time to be announced. Check the live schedule.') : '') + entryNote)}`, 'END:VEVENT');
   }
   lines.push('END:VCALENDAR');
   return lines.map(fold).join('\r\n') + '\r\n';
