@@ -11,6 +11,23 @@ export function matchesContestant(event, contestant) {
   return optionalStatus(event, contestant) !== 'not-entered';
 }
 export const scheduleFor = contestants => events.filter(event => contestants.some(c => matchesContestant(event, c)));
+export function scheduleForView({ tab = 'schedule', day = 'all', contestants = [], now = Date.now() } = {}) {
+  let list = tab === 'mine' ? scheduleFor(contestants) : events;
+  if (tab === 'schedule' && day === 'all') {
+    // A group remains until the next distinct start, even after its scheduled end.
+    const started = events.map(event => eventInstant(event).getTime()).filter(start => start <= now);
+    const latestStart = Math.max(-Infinity, ...started);
+    list = list.filter(event => eventInstant(event).getTime() >= latestStart);
+  }
+  return list.filter(event => day === 'all' || event.date === day);
+}
+export function scheduleClockKey(now = Date.now()) {
+  return events.map(event => now < eventInstant(event) ? 'upcoming' : event.end && now >= eventInstant(event, 'end') ? 'ended' : 'started').join(',');
+}
+export function nextScheduleChange(now = Date.now()) {
+  const future = events.flatMap(event => [eventInstant(event).getTime(), ...(event.end ? [eventInstant(event, 'end').getTime()] : [])]).filter(time => time > now);
+  return future.length ? Math.min(...future) : null;
+}
 export function timeLabel(time) {
   if (!time) return '';
   const [hours, minutes] = time.split(':').map(Number);

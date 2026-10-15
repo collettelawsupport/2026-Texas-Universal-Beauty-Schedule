@@ -1,7 +1,7 @@
 import { optionalStatus, optionalEntryLabels, unknownOptionals, sanitizeOptionalFields } from './optionals.js';
 import { renderHandbook } from './handbook.js';
 import { competition, days, divisions, events, optionalCategories } from './data.js';
-import { STORE_KEY, escapeHTML as h, contestantName, matchesContestant, scheduleFor, timeLabel, parseSaved, calendarFile, eventInstant } from './logic.js';
+import { STORE_KEY, escapeHTML as h, contestantName, matchesContestant, scheduleForView, scheduleClockKey, nextScheduleChange, timeLabel, parseSaved, calendarFile, eventInstant } from './logic.js';
 const $ = selector => document.querySelector(selector);
 let saved;
 try { saved = parseSaved(localStorage.getItem(STORE_KEY)); } catch { saved = parseSaved(null); }
@@ -10,6 +10,8 @@ try { localStorage.setItem(STORE_KEY, JSON.stringify(saved)); } catch {}
 const initialTab = ['mine', 'contestants', 'handbook'].includes(location.hash.slice(1)) ? location.hash.slice(1) : 'schedule';
 const state = { ...saved, roster: [], rosterState: 'loading', syncedAt: null, tab: initialTab, day: 'all', category: 'all', search: '', division: 'all', person: 'all', onlyWatched: false };
 let toastTimer;
+let renderedEventClockKey;
+let scheduleClockTimer;
 const icons = {
   calendar: '<svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M7 3v4m10-4v4M3 11h18m4 4h4"/></svg>',
   heart: '<svg viewBox="0 0 24 24"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1.1-1.1a5.5 5.5 0 0 0-7.8 7.8L12 21l8.8-8.6a5.5 5.5 0 0 0 0-7.8Z"/></svg>',
@@ -29,17 +31,17 @@ function avatar(c, size = '') { return `<span class="avatar ${size}" aria-hidden
 function switchTab(tab) { state.tab = tab; state.search = ''; state.category = 'all'; history.replaceState(null, '', tab === 'schedule' ? location.pathname : `#${tab}`); render(); }
 function divisionLabel(c) { return `${c.division}${c.participation === 'optionals-only' ? ' · Optionals only' : ''}${c.program === 'prince' ? ' · Prince' : ''}`; }
 function filteredEvents() {
-  const list = state.tab === 'mine' ? scheduleFor(selected()) : events;
-  return list.filter(e => (state.day === 'all' || e.date === state.day) && (state.category === 'all' || e.category === state.category) && (!state.search || `${e.title} ${e.details}`.toLowerCase().includes(state.search.toLowerCase())));
+  const list = scheduleForView({ tab: state.tab, day: state.day, contestants: selected() });
+  return list.filter(e => (state.category === 'all' || e.category === state.category) && (!state.search || `${e.title} ${e.details}`.toLowerCase().includes(state.search.toLowerCase())));
 }
 function eventCard(event) {
   const people = (state.tab === 'mine' ? selected() : watched()).filter(c => matchesContestant(event, c));
   const unconfirmed = people.filter(c => optionalStatus(event, c) === 'unknown');
   const isNow = Date.now() >= eventInstant(event) && event.end && Date.now() < eventInstant(event, 'end');
-  return `<article class="event-row ${event.id === 'candyland' ? 'candy-event' : ''}"><div class="event-time"><strong>${timeLabel(event.start).replace(' ', '<span>') + '</span>'}</strong>${event.end ? `<small>– ${timeLabel(event.end)}</small>` : ''}</div><div class="timeline-mark" aria-hidden="true"><span></span></div><details class="event-card"><summary><div class="event-main"><div class="event-labels"><span class="tag ${event.category}">${labels[event.category]}</span>${isNow ? '<span class="live-label">Happening now</span>' : ''}</div><h3>${h(event.title)}${event.id === 'candyland' ? '<span class="event-sparkle" aria-hidden="true"> ✦</span>' : ''}</h3><p>${h(event.subtitle)}</p>${'checkin' in event ? `<div class="check-in">${icons.calendar} Check-in: ${event.checkin ? timeLabel(event.checkin) : '<span>To be announced</span>'}</div>` : ''}${unconfirmed.length ? `<div class="entry-note">Entry not confirmed: ${unconfirmed.map(c => h(c.name)).join(', ')}</div>` : ''}${people.length ? `<div class="event-people">${people.map(c => `<span>${avatar(c, 'mini')}${h(contestantName(c))}</span>`).join('')}</div>` : ''}</div><span class="expand-icon" aria-hidden="true">+</span></summary><div class="event-details"><p>${h(event.details)}</p>${event.attire ? `<p><b>What to wear</b><br>${h(event.attire)}</p>` : ''}${event.bring ? `<p><b>What to bring</b><br>${h(event.bring)}</p>` : ''}<p class="location-line">${icons.pin} ${h(competition.venue)}</p>${event.timeNeedsConfirmation && !competition.timesConfirmed ? '<p>Time awaiting organizer confirmation.</p>' : ''}</div></details></article>`;
+  return `<article class="event-row ${event.id === 'candyland' ? 'candy-event' : ''}"><div class="event-time"><strong>${timeLabel(event.start).replace(' ', '<span>') + '</span>'}</strong>${event.end ? `<small>– ${timeLabel(event.end)}</small>` : ''}</div><div class="timeline-mark" aria-hidden="true"><span></span></div><details class="event-card" data-event-id="${h(event.id)}"><summary><div class="event-main"><div class="event-labels"><span class="tag ${event.category}">${labels[event.category]}</span>${isNow ? '<span class="live-label">Happening now</span>' : ''}</div><h3>${h(event.title)}${event.id === 'candyland' ? '<span class="event-sparkle" aria-hidden="true"> ✦</span>' : ''}</h3><p>${h(event.subtitle)}</p>${'checkin' in event ? `<div class="check-in">${icons.calendar} Check-in: ${event.checkin ? timeLabel(event.checkin) : '<span>To be announced</span>'}</div>` : ''}${unconfirmed.length ? `<div class="entry-note">Entry not confirmed: ${unconfirmed.map(c => h(c.name)).join(', ')}</div>` : ''}${people.length ? `<div class="event-people">${people.map(c => `<span>${avatar(c, 'mini')}${h(contestantName(c))}</span>`).join('')}</div>` : ''}</div><span class="expand-icon" aria-hidden="true">+</span></summary><div class="event-details"><p>${h(event.details)}</p>${event.attire ? `<p><b>What to wear</b><br>${h(event.attire)}</p>` : ''}${event.bring ? `<p><b>What to bring</b><br>${h(event.bring)}</p>` : ''}<p class="location-line">${icons.pin} ${h(competition.venue)}</p>${event.timeNeedsConfirmation && !competition.timesConfirmed ? '<p>Time awaiting organizer confirmation.</p>' : ''}</div></details></article>`;
 }
 function dayControls() {
-  return `<div class="day-buttons" role="group" aria-label="Filter by day"><button data-day="all" class="${state.day === 'all' ? 'active' : ''}" aria-pressed="${state.day === 'all'}">All weekend</button>${days.map(d => `<button data-day="${d.date}" class="${state.day === d.date ? 'active' : ''}" aria-pressed="${state.day === d.date}">${d.short}<span>${d.month === 'OCT' ? 'Oct' : 'Nov'} ${Number(d.number)}</span></button>`).join('')}</div>`;
+  return `<div class="day-buttons" role="group" aria-label="Filter by day"><button data-day="all" class="${state.day === 'all' ? 'active' : ''}" aria-pressed="${state.day === 'all'}">${state.tab === 'schedule' ? 'Now & upcoming' : 'All weekend'}</button>${days.map(d => `<button data-day="${d.date}" class="${state.day === d.date ? 'active' : ''}" aria-pressed="${state.day === d.date}">${d.short}<span>${d.month === 'OCT' ? 'Oct' : 'Nov'} ${Number(d.number)}</span></button>`).join('')}</div>`;
 }
 function sidebar() {
   const list = watched();
@@ -60,10 +62,11 @@ function renderSchedule() {
   return `<div class="section-heading"><div><span class="eyebrow">${mine ? 'SAVED JUST FOR YOU' : 'YOUR WEEKEND, AT A GLANCE'}</span><h2>${mine ? 'My schedule' : 'Every moment matters.'}</h2><p>${mine ? (selected().length && selected().every(c => c.participation === 'optionals-only') ? 'Only entered optional stage events for your selected contestants.' : 'The essentials, celebrations, and entered optionals for your watched contestants.') : 'From the first hello to the final crown. Find your next special moment.'}</p></div><div class="heading-actions"><button class="button button-quiet" id="print">Print ${icons.download}</button><button class="button button-outline" id="calendar" ${mine && !selected().length ? 'disabled' : ''}>Add to calendar ${icons.calendar}</button></div></div>${mine ? `<div class="personal-bar"><div class="person-pills"><button data-person="all" class="${state.person === 'all' ? 'active' : ''}">Everyone I’m watching <span>${watched().length}</span></button>${watched().map(c => `<button data-person="${h(c.id)}" class="${state.person === c.id ? 'active' : ''}">${avatar(c, 'mini')}${h(contestantName(c))}</button>`).join('')}</div><button class="text-button" data-go="contestants">+ Manage contestants</button></div>${personalEntries()}` : ''}<div class="schedule-layout"><section class="schedule-column" aria-label="Events"><div class="schedule-tools">${dayControls()}<div class="search-row"><label class="search-box">${icons.search}<input id="event-search" type="search" placeholder="Find an event…" aria-label="Find an event" value="${h(state.search)}"></label><select id="event-category" aria-label="Filter event type"><option value="all">All event types</option>${Object.entries(labels).map(([value, label]) => `<option value="${value}" ${state.category === value ? 'selected' : ''}>${label}</option>`).join('')}</select></div></div><div id="event-results">${eventResults()}</div></section>${sidebar()}</div>`;
 }
 function eventResults() {
+  renderedEventClockKey = scheduleClockKey();
   if (state.tab === 'mine' && !watched().length) return `<div class="empty-state"><span class="empty-icon">${icons.heart}</span><h3>Your weekend, made personal.</h3><p>Choose the contestants you’re cheering for to see their events here.</p><button class="button primary" data-go="contestants">Find contestants ${icons.arrow}</button></div>`;
   const list = filteredEvents();
   if (!list.length) return `<div class="empty-state"><span class="empty-icon">${icons.search}</span><h3>No events in this view</h3><p>Try a different day or clear your filters.</p><button class="button button-outline" id="reset-filters">Show all events</button></div>`;
-  return `<p class="result-count" aria-live="polite">${list.length} event${list.length === 1 ? '' : 's'}${state.tab === 'mine' ? ` for ${selected().length === 1 ? h(contestantName(selected()[0])) : 'your cheering section'}` : ' across the weekend'} <span>Tap an event for the details</span></p>${days.map((d, i) => {
+  return `${state.tab === 'schedule' && state.day === 'all' ? '<p class="schedule-time-note">Updates automatically in Central Time. Earlier events leave this view when the next event starts. Choose a day to see its complete schedule.</p>' : ''}<p class="result-count" aria-live="polite">${list.length} event${list.length === 1 ? '' : 's'}${state.tab === 'mine' ? ` for ${selected().length === 1 ? h(contestantName(selected()[0])) : 'your cheering section'}` : ' across the weekend'} <span>Tap an event for the details</span></p>${days.map((d, i) => {
     const todayEvents = list.filter(e => e.date === d.date);
     return todayEvents.length ? `<section class="day-section"><div class="day-heading"><span class="date-stamp"><small>${d.month}</small><strong>${d.number}</strong></span><div><span class="day-kicker">DAY ${String(i + 1).padStart(2, '0')} · ${d.label.toUpperCase()}</span><h2>${d.title}</h2><p>${d.subtitle}</p></div></div><div class="event-list">${todayEvents.map(eventCard).join('')}</div></section>` : '';
   }).join('')}`;
@@ -160,3 +163,24 @@ loadRoster().then(render);
 let lastRefresh = Date.now();
 async function refreshIfNeeded() { if (!document.hidden && Date.now() - lastRefresh >= 5 * 60 * 1000) { lastRefresh = Date.now(); await loadRoster(); if (!$('#profile-dialog').open) render(); } }
 setInterval(refreshIfNeeded, 60 * 1000); document.addEventListener('visibilitychange', refreshIfNeeded);
+
+// Advance at event boundaries without disturbing filters, open details, or personal schedules.
+function refreshTimedSchedule() {
+  clearTimeout(scheduleClockTimer);
+  const now = Date.now();
+  if (!document.hidden && state.tab === 'schedule' && state.day === 'all' && !$('#profile-dialog').open && scheduleClockKey(now) !== renderedEventClockKey) {
+    const openIds = [...document.querySelectorAll('#event-results .event-card[open]')].map(card => card.dataset.eventId);
+    const focusedId = document.activeElement?.closest('.event-card')?.dataset.eventId;
+    $('#event-results').innerHTML = eventResults();
+    document.querySelectorAll('#event-results .event-card').forEach(card => {
+      card.open = openIds.includes(card.dataset.eventId);
+      if (card.dataset.eventId === focusedId) card.querySelector('summary').focus({ preventScroll: true });
+    });
+  }
+  const next = nextScheduleChange(now);
+  scheduleClockTimer = setTimeout(refreshTimedSchedule, next === null ? 60000 : Math.max(1, Math.min(60000, next - Date.now())));
+}
+refreshTimedSchedule();
+document.addEventListener('visibilitychange', refreshTimedSchedule);
+window.addEventListener('pageshow', refreshTimedSchedule);
+$('#profile-dialog').addEventListener('close', refreshTimedSchedule);

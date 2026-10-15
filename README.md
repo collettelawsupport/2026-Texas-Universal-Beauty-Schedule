@@ -5,6 +5,7 @@ A responsive Candyland-themed guide to the October 30–November 1 Texas Our Lit
 ## Features
 
 - All 13 events, with day filters, search, event categories, attire, check-in notes, and event details.
+- Full schedule defaults to **Now & upcoming**: earlier start-time groups disappear when the next distinct start arrives in Central Time. Events sharing a start remain together, even if their end times differ. Before the weekend all events appear; the final farewell stays after the last start. Individual day views and My schedule retain their complete event lists. The open page advances automatically at start/end boundaries and catches up when returning from the background.
 - Contestant checkboxes build a separate **My schedule** tab. Switch between everyone being watched and one contestant.
 - Required/shared events appear for competition contestants. Entered optionals are matched from the roster, and unknown entries remain visible with a confirmation note. Optionals-only entrants receive only confirmed optional stage sessions.
 - Watch selections and optional personal profiles are stored only in the current browser. They do not register contestants and do not sync between devices.
