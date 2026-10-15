@@ -1,0 +1,26 @@
+{
+  "id": "/",
+  "name": "Texas OLM 2026",
+  "short_name": "Texas OLM",
+  "description": "Your Texas Our Little Miss competition weekend schedule.",
+  "lang": "en-US",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "theme_color": "#ae365d",
+  "background_color": "#fcfaf8",
+  "icons": [
+    {
+      "src": "/assets/app-icon-192-v1.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/assets/app-icon-512-v1.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

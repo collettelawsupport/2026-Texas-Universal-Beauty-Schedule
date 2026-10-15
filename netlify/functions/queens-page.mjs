@@ -6,6 +6,7 @@ export default async function handler(request) {
   const unlocked = Boolean(sessionFor(request, await loadAccess()));
   const html = `<!doctype html><html lang="en"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#ae365d"><meta name="robots" content="noindex,nofollow">
+<meta name="apple-mobile-web-app-title" content="OLM Queens"><link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png?v=20261014">
 <title>Queens’ Schedule · Texas OLM 2026</title><link rel="icon" href="/assets/favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="/src/styles.css"><link rel="stylesheet" href="/src/queens.css"><link rel="stylesheet" href="/src/handbook.css"></head>
 <body class="queens-page"><a class="skip-link" href="#main">Skip to Queens section</a>
 <header class="site-header"><a class="brand" href="/" aria-label="Texas Our Little Miss home"><span class="brand-mark" aria-hidden="true">♔</span><span>TEXAS <b>OUR LITTLE MISS</b><small>UNIVERSAL BEAUTY · 2026</small></span></a>${unlocked ? '<button class="button button-quiet" id="sign-out">Sign out</button>' : '<a class="button button-quiet" href="/">← Main schedule</a>'}</header>
