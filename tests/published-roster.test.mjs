@@ -54,20 +54,17 @@ test('the optionals-only participation marker survives public sanitation', () =>
   for (const participation of ['invalid', true, '<script>']) assert.deepEqual(sanitizeRoster({contestants:[{...base,participation}]}), [base]);
 });
 
-test('published roster contains 17 competition contestants and one approved optionals-only entrant', async () => {
+test('published roster contains 15 competition contestants and one approved optionals-only entrant', async () => {
   const data = JSON.parse(await readFile(new URL('../public/data/roster.json', import.meta.url)));
   const roster = sanitizeRoster(data);
   assert.equal(data.source, 'published-snapshot');
-  assert.equal(roster.length, 18);
-  assert.equal(roster.filter(c => c.participation !== 'optionals-only').length, 17);
+  assert.equal(roster.length, 16);
+  assert.equal(roster.filter(c => c.participation !== 'optionals-only').length, 15);
   assert.deepEqual(roster.filter(c => c.program === 'prince').map(c => c.name), ['Paxtyn Pike', 'Silas Elgourbi']);
   assert.ok(roster.every(c => divisions.includes(c.division)));
-  const sydni = roster.find(c => c.name === 'Sydni Lee');
-  const brittany = roster.find(c => c.name === 'Brittany Skye Pike');
-  assert.equal(sydni.division, '3 - 6 years');
-  assert.deepEqual(sydni.optionals, ['optional-talent']);
-  assert.equal(brittany.division, '7 - 9 years');
-  assert.deepEqual(brittany.optionals, ['practice-interview']);
+  assert.ok(!roster.some(c => ['Sydni Lee', 'Sydney Lee', 'Brittany Skye Pike', 'Brittany Pike'].includes(c.name)));
+  assert.equal(roster.find(c => c.name === 'Mareigh Chavez').id, 'contestant-dd0d4936dfa93984caa5b7eb');
+  assert.equal(roster.find(c => c.name === 'Paxtyn Pike').id, 'contestant-efe45ed63f1e80df1a248d1f');
   const brynley = roster.find(c => c.name === 'Brynley Buzzard');
   assert.equal(brynley.division, '10 - 12 years');
   assert.equal(brynley.participation, 'optionals-only');
