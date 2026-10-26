@@ -74,8 +74,9 @@ test('published roster contains 15 crown contestants, one Winners Circle entrant
   const victoria = roster.find(c => c.name === 'Victoria Stewart');
   assert.equal(victoria.division, '3 - 6 years');
   assert.equal(victoria.participation, 'winners-circle');
-  assert.equal(victoria.optionals, null);
+  assert.deepEqual(victoria.optionals, []);
+  assert.ok(!scheduleFor([victoria]).some(e => ['practice', 'pro-am', 'livin-doll', 'special-awards'].includes(e.id)));
   assert.deepEqual(scheduleFor([victoria]), scheduleFor([{ ...victoria, participation: undefined }]));
   assert.ok(roster.some(c => c.name === 'Victoria Dishon'));
-  assert.ok(!roster.some(c => c.name === 'Allison Nice'));
+  assert.ok(!roster.some(c => ['Allison Nice', 'Austyn Tomberlan', 'A'].includes(c.name)));
 });

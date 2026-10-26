@@ -7,19 +7,30 @@ import { sanitizeRoster } from '../../netlify/lib/roster.mjs';
 const sheets = [
   { name: 'Living Doll', category: 'livin-doll', columns: [['Entered', null]], color: 'FFFFC000' },
   { name: 'Practice Interview', category: 'practice-interview', columns: [['Entered', null]], color: 'FFFFC000' },
-  { name: 'Command_Optional Talent', category: 'optional-talent', columns: [['Command Performance', 'command-performance'], ['Optional Talent', 'optional-talent']], color: 'FFF4B183' }
+  { name: 'Command_Optional Talent', category: 'optional-talent', columns: [['Command Performance', 'command-performance'], ['Optional Talent', 'optional-talent']], color: 'FFF4B183' },
+  { name: 'Pro Am Modeling', category: 'pro-am', columns: [['Entered', null]], color: 'FFF4B183', yesNo: true }
 ];
 const normalize = name => name.normalize('NFKC').trim().replace(/\s+/g, ' ').toLowerCase();
 const text = cell => cell.value == null ? '' : cell.text.trim();
-function isEntered(cell, color) {
+const rgb = color => color?.toUpperCase().replace(/^FF(?=[\dA-F]{6}$)/, '');
+function isEntered(cell, spec) {
   const fill = cell.fill;
-  if (fill?.pattern === 'solid' && fill.fgColor?.argb?.toUpperCase() === color) return true;
-  if (text(cell) || (fill?.pattern === 'solid' && !['FFFFFFFF', '00000000'].includes(fill.fgColor?.argb?.toUpperCase()))) throw new Error(`Unrecognized optional marker at ${cell.address}`);
-  return false;
+  const highlighted = fill?.pattern === 'solid' && rgb(fill.fgColor?.argb) === rgb(spec.color);
+  const uncolored = fill?.pattern !== 'solid' || ['FFFFFF', '00000000'].includes(rgb(fill.fgColor?.argb));
+  const value = text(cell);
+  if (spec.yesNo) {
+    if (value === 'Yes' && (highlighted || uncolored)) return true;
+    if (value === 'No' && uncolored) return false;
+  } else if (!value) {
+    if (highlighted) return true;
+    if (uncolored) return false;
+  }
+  throw new Error(`Unrecognized optional marker at ${cell.address}`);
 }
-export async function optionalEntriesFromWorkbook(bytes) {
+export async function optionalEntriesFromWorkbook(bytes, { excludeNames = [] } = {}) {
   const workbook = new ExcelJS.Workbook();
   await workbook.xlsx.load(bytes);
+  const excluded = new Set(excludeNames.map(normalize));
   const records = new Map();
   let recognized = 0;
   for (const spec of sheets) {
@@ -31,11 +42,12 @@ export async function optionalEntriesFromWorkbook(bytes) {
     for (let row = 2; row <= sheet.rowCount; row++) {
       const name = text(sheet.getCell(row, 2)).replace(/\s+/g, ' ');
       if (!name) continue; // Blank scorecard rows do not identify a contestant.
+      if (excluded.has(normalize(name))) continue;
       const division = text(sheet.getCell(row, 1));
       if (!divisions.includes(division)) throw new Error(`Unrecognized division for ${name}`);
       const key = `${normalize(name)}|${division}`;
       const record = records.get(key) || { name, division, selections: {} };
-      const marked = spec.columns.filter((_, index) => isEntered(sheet.getCell(row, index + 3), spec.color));
+      const marked = spec.columns.filter((_, index) => isEntered(sheet.getCell(row, index + 3), spec));
       const selection = { entered: marked.length > 0, details: marked.map(([, detail]) => detail).filter(Boolean) };
       const previous = record.selections[spec.category];
       if (previous && JSON.stringify(previous) !== JSON.stringify(selection)) throw new Error(`Conflicting duplicate entries for ${name} in ${spec.name}`);

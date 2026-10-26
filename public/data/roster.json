@@ -1,18 +1,20 @@
 {
   "source": "published-snapshot",
-  "updatedAt": "2026-10-26T03:51:13.688Z",
+  "updatedAt": "2026-10-26T05:39:51.756Z",
   "contestants": [
     {
       "id": "contestant-7a430f914fcdf0df0f444342",
       "name": "Analisa Hernandez",
       "division": "7 - 9 years",
       "optionals": [
-        "practice-interview"
+        "practice-interview",
+        "pro-am"
       ],
       "optionalCoverage": [
         "livin-doll",
         "practice-interview",
-        "optional-talent"
+        "optional-talent",
+        "pro-am"
       ]
     },
     {
@@ -21,19 +23,31 @@
       "division": "10 - 12 years",
       "optionals": [
         "livin-doll",
-        "practice-interview"
+        "practice-interview",
+        "pro-am"
       ],
       "optionalCoverage": [
         "livin-doll",
         "practice-interview",
-        "optional-talent"
+        "optional-talent",
+        "pro-am"
       ]
     },
     {
       "id": "contestant-d3d52342cdeb2120ff2df9ed",
       "name": "Bonnie Raquet",
       "division": "13 - 15 years",
-      "optionals": null
+      "optionals": [
+        "livin-doll",
+        "practice-interview",
+        "pro-am"
+      ],
+      "optionalCoverage": [
+        "livin-doll",
+        "practice-interview",
+        "optional-talent",
+        "pro-am"
+      ]
     },
     {
       "id": "contestant-99796932b0b04a123a4f2223",
@@ -41,16 +55,22 @@
       "division": "10 - 12 years",
       "optionals": [
         "livin-doll",
+        "practice-interview",
+        "optional-talent",
+        "pro-am"
+      ],
+      "participation": "optionals-only",
+      "optionalCoverage": [
+        "practice-interview",
         "pro-am",
         "optional-talent",
-        "practice-interview"
+        "livin-doll"
       ],
       "optionalDetails": {
         "optional-talent": [
           "optional-talent"
         ]
-      },
-      "participation": "optionals-only"
+      }
     },
     {
       "id": "contestant-436d508fe463a35ec9207a2c",
@@ -58,12 +78,14 @@
       "division": "10 - 12 years",
       "optionals": [
         "livin-doll",
-        "practice-interview"
+        "practice-interview",
+        "pro-am"
       ],
       "optionalCoverage": [
         "livin-doll",
         "practice-interview",
-        "optional-talent"
+        "optional-talent",
+        "pro-am"
       ]
     },
     {
@@ -79,12 +101,14 @@
       "optionals": [
         "livin-doll",
         "practice-interview",
-        "optional-talent"
+        "optional-talent",
+        "pro-am"
       ],
       "optionalCoverage": [
         "livin-doll",
         "practice-interview",
-        "optional-talent"
+        "optional-talent",
+        "pro-am"
       ],
       "optionalDetails": {
         "optional-talent": [
@@ -97,12 +121,14 @@
       "name": "Jesse Finch",
       "division": "0 - 2 years",
       "optionals": [
-        "livin-doll"
+        "livin-doll",
+        "pro-am"
       ],
       "optionalCoverage": [
         "livin-doll",
         "practice-interview",
-        "optional-talent"
+        "optional-talent",
+        "pro-am"
       ]
     },
     {
@@ -112,12 +138,14 @@
       "optionals": [
         "livin-doll",
         "practice-interview",
-        "optional-talent"
+        "optional-talent",
+        "pro-am"
       ],
       "optionalCoverage": [
         "livin-doll",
         "practice-interview",
-        "optional-talent"
+        "optional-talent",
+        "pro-am"
       ],
       "optionalDetails": {
         "optional-talent": [
@@ -129,7 +157,21 @@
       "id": "contestant-dd0d4936dfa93984caa5b7eb",
       "name": "Mareigh Chavez",
       "division": "3 - 6 years",
-      "optionals": null
+      "optionals": [
+        "optional-talent",
+        "pro-am"
+      ],
+      "optionalCoverage": [
+        "livin-doll",
+        "practice-interview",
+        "optional-talent",
+        "pro-am"
+      ],
+      "optionalDetails": {
+        "optional-talent": [
+          "optional-talent"
+        ]
+      }
     },
     {
       "id": "contestant-526c47bafe5b62440b136973",
@@ -141,15 +183,24 @@
       "optionalCoverage": [
         "livin-doll",
         "practice-interview",
-        "optional-talent"
+        "optional-talent",
+        "pro-am"
       ]
     },
     {
       "id": "contestant-efe45ed63f1e80df1a248d1f",
       "name": "Paxtyn Pike",
       "division": "7 - 9 years",
-      "optionals": null,
-      "program": "prince"
+      "optionals": [
+        "practice-interview"
+      ],
+      "program": "prince",
+      "optionalCoverage": [
+        "livin-doll",
+        "practice-interview",
+        "optional-talent",
+        "pro-am"
+      ]
     },
     {
       "id": "contestant-0a6974bdea67ca6c68427d05",
@@ -161,7 +212,8 @@
       "optionalCoverage": [
         "livin-doll",
         "practice-interview",
-        "optional-talent"
+        "optional-talent",
+        "pro-am"
       ]
     },
     {
@@ -169,12 +221,14 @@
       "name": "Silas Elgourbi",
       "division": "0 - 2 years",
       "optionals": [
-        "livin-doll"
+        "livin-doll",
+        "pro-am"
       ],
       "optionalCoverage": [
         "livin-doll",
         "practice-interview",
-        "optional-talent"
+        "optional-talent",
+        "pro-am"
       ],
       "program": "prince"
     },
@@ -182,7 +236,16 @@
       "id": "contestant-b9e4d56dccc44a41d2cc129e",
       "name": "Skylar Beaver",
       "division": "3 - 6 years",
-      "optionals": null
+      "optionals": [
+        "practice-interview",
+        "pro-am"
+      ],
+      "optionalCoverage": [
+        "livin-doll",
+        "practice-interview",
+        "optional-talent",
+        "pro-am"
+      ]
     },
     {
       "id": "contestant-5cb7014c7bdd22522c5cd15d",
@@ -191,12 +254,14 @@
       "optionals": [
         "livin-doll",
         "practice-interview",
-        "optional-talent"
+        "optional-talent",
+        "pro-am"
       ],
       "optionalCoverage": [
         "livin-doll",
         "practice-interview",
-        "optional-talent"
+        "optional-talent",
+        "pro-am"
       ],
       "optionalDetails": {
         "optional-talent": [
@@ -208,8 +273,14 @@
       "id": "contestant-e983a34739a2009dcf553184",
       "name": "Victoria Stewart",
       "division": "3 - 6 years",
-      "optionals": null,
-      "participation": "winners-circle"
+      "optionals": [],
+      "participation": "winners-circle",
+      "optionalCoverage": [
+        "livin-doll",
+        "practice-interview",
+        "optional-talent",
+        "pro-am"
+      ]
     }
   ]
 }
