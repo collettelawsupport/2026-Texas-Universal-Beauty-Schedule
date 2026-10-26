@@ -64,6 +64,16 @@ test('unmatched and ambiguous people are not silently assigned to existing conte
   assert.throws(() => mergeOptionalEntries([base, { ...base, id: 'other', name: 'Example Middle Contestant' }], [{ ...entry, name: base.name }]), /Ambiguous/);
 });
 
+test('later optional imports preserve Winners Circle status and contestant identity', () => {
+  const original = { ...base, participation: 'winners-circle' };
+  const entries = [{ name: base.name, division: base.division, selections: { 'livin-doll': { entered: true, details: [] } } }];
+  const result = mergeOptionalEntries([original], entries);
+  assert.equal(result.matched, 1);
+  assert.equal(result.contestants[0].id, base.id);
+  assert.equal(result.contestants[0].participation, 'winners-circle');
+  assert.deepEqual(result.contestants[0].optionals, ['livin-doll']);
+});
+
 test('partial coverage hides known non-entries but keeps unknown combined event entries marked', () => {
   const c = { ...base, optionals: [], optionalCoverage: ['practice-interview', 'optional-talent', 'livin-doll'] };
   assert.equal(optionalStatus(events.find(e => e.id === 'practice'), c), 'not-entered');

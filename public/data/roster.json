@@ -1,6 +1,6 @@
 {
   "source": "published-snapshot",
-  "updatedAt": "2026-10-19T22:46:16.095Z",
+  "updatedAt": "2026-10-26T03:51:13.688Z",
   "contestants": [
     {
       "id": "contestant-7a430f914fcdf0df0f444342",
@@ -203,6 +203,13 @@
           "optional-talent"
         ]
       }
+    },
+    {
+      "id": "contestant-e983a34739a2009dcf553184",
+      "name": "Victoria Stewart",
+      "division": "3 - 6 years",
+      "optionals": null,
+      "participation": "winners-circle"
     }
   ]
 }

@@ -21,6 +21,19 @@ test('optionals from multiple watched contestants form one deduplicated family s
  assert.equal(list.length,13); assert.equal(list.filter(e=>e.id==='special-awards').length,1);
 });
 test('unknown optional entries are not silently hidden',()=>assert.equal(scheduleFor([person(null)]).length,13));
+test('Winners Circle uses the main contestant schedule and keeps its practice status in calendar exports', () => {
+ for (const optionals of [null, [], ['practice-interview', 'pro-am']]) {
+  const regular = person(optionals);
+  const practice = { ...regular, participation: 'winners-circle' };
+  const list = scheduleFor([practice]);
+  assert.deepEqual(list, scheduleFor([regular]));
+  assert.ok(['registration', 'close-up', 'playtime', 'parents', 'sportswear', 'candyland', 'evening-gown', 'finals', 'farewell'].every(id => list.some(e => e.id === id)));
+  const calendar = calendarFile(list, true, [practice]).replace(/\r\n /g, '');
+  assert.match(calendar, /Test Contestant · Winners Circle: Practice participant from another state\. Not eligible for a crown\./);
+  assert.match(calendar, /UID:finals-/);
+  assert.ok(!calendarFile(list, true, [regular]).includes('Winners Circle'));
+ }
+});
 test('optionals-only contestants receive only confirmed stage events, including calendar exports', () => {
  const c = { ...person(['pro-am', 'optional-talent', 'practice-interview']), participation: 'optionals-only' };
  const list = scheduleFor([c]);

@@ -1,5 +1,6 @@
 import { events } from './data.js';
 import { optionalStatus, sanitizeOptionalFields } from './optionals.js';
+import { winnersCircleNote } from './participation.js';
 export const STORE_KEY = 'txolm-schedule-v1';
 export const contestantName = contestant => `${contestant.name}${contestant.participation === 'optionals-only' ? '*' : ''}`;
 export const escapeHTML = value => String(value ?? '').replace(/[&<>"']/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[char]);
@@ -55,7 +56,8 @@ export function calendarFile(selectedEvents, confirmed, contestants = []) {
     const end = event.end ? eventInstant(event, 'end') : new Date(eventInstant(event).getTime() + 15 * 60000);
     const pending = contestants.filter(c => matchesContestant(event, c) && optionalStatus(event, c) === 'unknown');
     const entryNote = pending.length ? `\nEntry not confirmed: ${pending.map(c => c.name).join(', ')}. Check the live schedule for updates.` : '';
-    lines.push('BEGIN:VEVENT', `UID:${event.id}-2026@texasolm.schedule`, `DTSTAMP:${stamp(new Date())}`, `DTSTART:${stamp(eventInstant(event))}`, `DTEND:${stamp(end)}`, `SUMMARY:${escape(event.title)}`, 'LOCATION:Texas A&M Hotel and Convention Center', `DESCRIPTION:${escape(event.details + ('checkin' in event ? '\nCheck-in: ' + (event.checkin ? timeLabel(event.checkin) : 'Time to be announced. Check the live schedule.') : '') + entryNote)}`, 'END:VEVENT');
+    const practiceNote = contestants.filter(c => c.participation === 'winners-circle' && matchesContestant(event, c)).map(c => `\n${c.name} · Winners Circle: ${winnersCircleNote}`).join('');
+    lines.push('BEGIN:VEVENT', `UID:${event.id}-2026@texasolm.schedule`, `DTSTAMP:${stamp(new Date())}`, `DTSTART:${stamp(eventInstant(event))}`, `DTEND:${stamp(end)}`, `SUMMARY:${escape(event.title)}`, 'LOCATION:Texas A&M Hotel and Convention Center', `DESCRIPTION:${escape(event.details + ('checkin' in event ? '\nCheck-in: ' + (event.checkin ? timeLabel(event.checkin) : 'Time to be announced. Check the live schedule.') : '') + entryNote + practiceNote)}`, 'END:VEVENT');
   }
   lines.push('END:VCALENDAR');
   return lines.map(fold).join('\r\n') + '\r\n';
