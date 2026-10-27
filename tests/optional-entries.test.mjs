@@ -169,8 +169,12 @@ test('published selections match representative source highlights without replac
   assert.deepEqual(find('Mareigh Chavez').optionals, ['optional-talent', 'pro-am']);
   assert.deepEqual(find('Bonnie Raquet').optionals, ['livin-doll', 'practice-interview', 'pro-am']);
   assert.deepEqual(find('Skylar Beaver').optionals, ['practice-interview', 'pro-am']);
-  assert.equal(find('Isabella Chauvette').optionals, null);
-  assert.equal(contestants.filter(c => c.optionalCoverage?.length === 4).length, 16);
+  const isabella = find('Isabella Chauvette');
+  assert.deepEqual(isabella.optionals, ['livin-doll']);
+  assert.equal(contestants.filter(c => c.optionalCoverage?.length === 4).length, 17);
+  assert.ok(scheduleFor([isabella]).some(e => e.id === 'livin-doll'));
+  assert.ok(!scheduleFor([isabella]).some(e => ['practice', 'pro-am'].includes(e.id)));
+  assert.ok(!calendarFile(scheduleFor([isabella]), true, [isabella]).includes('Entry not confirmed'));
   assert.ok(!scheduleFor([find('Paxtyn Pike')]).some(e => ['pro-am', 'livin-doll'].includes(e.id)));
   assert.ok(!calendarFile(scheduleFor([find('Mareigh Chavez')]), true, [find('Mareigh Chavez')]).includes('Entry not confirmed'));
   assert.equal(contestants.filter(c => c.name === 'Victoria Dishon').length, 1);

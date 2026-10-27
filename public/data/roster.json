@@ -1,6 +1,6 @@
 {
   "source": "published-snapshot",
-  "updatedAt": "2026-10-26T05:39:51.756Z",
+  "updatedAt": "2026-10-27T22:35:11.518Z",
   "contestants": [
     {
       "id": "contestant-7a430f914fcdf0df0f444342",
@@ -92,7 +92,15 @@
       "id": "contestant-57110e45991c9c02b7fca42f",
       "name": "Isabella Chauvette",
       "division": "0 - 2 years",
-      "optionals": null
+      "optionals": [
+        "livin-doll"
+      ],
+      "optionalCoverage": [
+        "livin-doll",
+        "practice-interview",
+        "optional-talent",
+        "pro-am"
+      ]
     },
     {
       "id": "contestant-666de8bd04dce85c7e49894a",
