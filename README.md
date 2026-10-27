@@ -8,6 +8,7 @@ A responsive Candyland-themed guide to the October 30–November 1 Texas Our Lit
 - All 13 events, with day filters, search, event categories, attire, check-in notes, and event details.
 - Full schedule defaults to **Now & upcoming**: earlier start-time groups disappear when the next distinct start arrives in Central Time. Events sharing a start remain together, even if their end times differ. Before the weekend all events appear; the final farewell stays after the last start. Individual day views and My schedule retain their complete event lists. The open page advances automatically at start/end boundaries and catches up when returning from the background.
 - Contestant checkboxes build a separate **My schedule** tab. Switch between everyone being watched and one contestant.
+- Organizer-supplied portraits appear beside 15 contestants on roster cards, watch lists, and personal schedules. Photos are mapped to stable contestant IDs in `src/portraits.js`, so optional-entry imports preserve those associations. Brynley Buzzard, Victoria Stewart, and device-only personal profiles use initials until approved photos are provided. Netlify Image CDN serves small WebP copies; local previews use the supplied originals, and failed image requests fall back to the original or initials.
 - Required/shared events appear for competition contestants. Entered optionals are matched from the roster, and unknown entries remain visible with a confirmation note. Optionals-only entrants receive only confirmed optional stage sessions.
 - Watch selections and optional personal profiles are stored only in the current browser. They do not register contestants and do not sync between devices.
 - Personal profiles can be added or edited if the official roster is unavailable or an optional was added at registration.
@@ -95,6 +96,10 @@ Existing contestant IDs, display names, divisions, Prince labels, and participat
 `optionals` lists confirmed entries. `optionalCoverage` lists categories for which both entries and non-entries are known; omitted coverage retains the original complete-array behavior. `optionalDetails` may distinguish Optional Talent from Command Performance only; individual ProAm categories are never published. Imports preserve previously confirmed categories when a newer workbook lacks their sheet. Unknown events stay visible with confirmation notes in the app and personal calendar downloads. Run tests and review the snapshot before publishing.
 
 A fresh `import:roster` replaces the snapshot; reapply optional entries after a new roster import and reconcile identities before switching roster sources.
+
+## Contestant photos
+
+The October 27 photos are stored as `public/assets/portrait-*`. The organizer identified the first clipboard photo as Isabella Chauvette and confirmed that **Analisa Chavez.png** belongs to **Analisa Hernandez**, whose displayed name stays unchanged. **Paxton Pike 1.png** maps to the existing **Paxtyn Pike** record, and **Avienda.jpg** maps to **Aviendha Smith**. Where two photos were supplied, the organizer selected **Mareigh.jpg**, **Jasmine Romero.jpg**, and **Victoria Aurora Dishon2.jpg**. The supplied pictures are preserved without retouching; CSS frames them for each location in the app. Update the approved ID mapping and asset together when replacing a photo.
 
 ## Handbook
 

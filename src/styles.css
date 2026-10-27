@@ -14,4 +14,15 @@
 .participation-note{font-size:11px;line-height:1.7;color:var(--pink);margin:12px 0}.personal-entry-grid .participation-note{margin:0 0 10px}
 .contestant-card>.participation-note{margin:12px 18px}
 .schedule-time-note{font-size:11px;line-height:1.7;color:var(--muted);padding:12px 15px;border:1px solid var(--line);border-radius:9px;background:#fff;margin:16px 0}
+.avatar{position:relative;overflow:hidden;isolation:isolate}
+.avatar img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:var(--portrait-position,50% 30%)}
+.contestant-choice>.avatar{width:88px;height:104px;border-radius:12px;font-size:23px;box-shadow:0 0 0 1px #b3829b20}
+.watch-list .avatar{width:44px;height:44px}
+.avatar.mini{width:28px;height:28px}
+.avatar[data-portrait="skylar-beaver"]{--portrait-position:65% 20%}
+.avatar[data-portrait="skylar-beaver"] img{transform:scale(1.65);transform-origin:65% 20%}
+.avatar[data-portrait="misty-davis"]{--portrait-position:50% 20%}
+.avatar[data-portrait="analisa-hernandez"]{--portrait-position:50% 22%}
+.avatar[data-portrait="jesse-finch"]{--portrait-position:50% 20%}
+@media(max-width:740px){.contestant-choice{gap:16px;padding:18px}.contestant-choice>.avatar{width:96px;height:112px}.contestant-info strong{font-size:16px}.contestant-info small{display:block;margin-top:4px;line-height:1.5}}
 @media print{.personal-entries{break-inside:avoid}.personal-entry-grid{display:block}.personal-entry-grid>section{margin-bottom:10px}}

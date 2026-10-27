@@ -1,6 +1,7 @@
 import { optionalStatus, optionalEntryLabels, unknownOptionals, sanitizeOptionalFields } from './optionals.js';
 import { sanitizeParticipationFields, participationLabel, winnersCircleNote } from './participation.js';
 import { renderHandbook } from './handbook.js';
+import { portraitFor } from './portraits.js';
 import { competition, days, divisions, events, optionalCategories } from './data.js';
 import { STORE_KEY, escapeHTML as h, contestantName, matchesContestant, scheduleForView, scheduleClockKey, nextScheduleChange, timeLabel, parseSaved, calendarFile, eventInstant } from './logic.js';
 const $ = selector => document.querySelector(selector);
@@ -28,7 +29,17 @@ function selected() { return watched().filter(c => state.person === 'all' || c.i
 function notify(message) { $('#toast').textContent = message; $('#toast').classList.add('visible'); clearTimeout(toastTimer); toastTimer = setTimeout(() => $('#toast').classList.remove('visible'), 4000); }
 function save() { try { localStorage.setItem(STORE_KEY, JSON.stringify({ watched: state.watched, personal: state.personal })); } catch { notify('Your selection works now, but this browser cannot save it for next time.'); } }
 function initials(name) { return name.split(/\s+/).filter(Boolean).map(p => p[0]).slice(0, 2).join('').toUpperCase(); }
-function avatar(c, size = '') { return `<span class="avatar ${size}" aria-hidden="true">${h(initials(c.name))}</span>`; }
+function avatar(c, size = '') {
+  const portrait = portraitFor(c, { optimize: !['localhost', '127.0.0.1', '[::1]'].includes(location.hostname) });
+  return `<span class="avatar ${size}" ${portrait ? `data-portrait="${h(portrait.key)}"` : ''} aria-hidden="true">${h(initials(c.name))}${portrait ? `<img src="${h(portrait.src)}" data-original="${h(portrait.original)}" alt="" width="96" height="112" loading="lazy" decoding="async">` : ''}</span>`;
+}
+// If image optimization is unavailable, use the supplied photo; keep initials if it also fails.
+document.addEventListener('error', event => {
+  const img = event.target;
+  if (!(img instanceof HTMLImageElement) || !img.closest('.avatar')) return;
+  if (img.getAttribute('src') !== img.dataset.original) img.src = img.dataset.original;
+  else img.remove();
+}, true);
 function switchTab(tab) { state.tab = tab; state.search = ''; state.category = 'all'; history.replaceState(null, '', tab === 'schedule' ? location.pathname : `#${tab}`); render(); }
 function divisionLabel(c) { return [c.division, participationLabel(c), c.program === 'prince' ? 'Prince' : ''].filter(Boolean).join(' · '); }
 function filteredEvents() {
