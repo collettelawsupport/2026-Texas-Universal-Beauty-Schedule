@@ -3,3 +3,31 @@
 @media(max-width:740px){.main-tabs{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:0}.main-tabs button,.main-tabs>a{font-size:11px;justify-content:center;text-align:center;gap:0;min-width:0;padding:13px 3px;line-height:1.4}.main-tabs button>span:first-child,.main-tabs>a>span:first-child,.main-tabs .count{display:none}.handbook-layout{grid-template-columns:1fr;gap:28px}.handbook-book{display:grid;grid-template-columns:120px minmax(0,1fr);align-items:start}.handbook-cover{margin:18px 0 18px 18px;border-radius:7px;overflow:hidden;box-shadow:0 5px 15px #6d3d4b24}.handbook-book-copy{padding:20px 16px}.handbook-book-copy .eyebrow{font-size:7px;letter-spacing:1px}.handbook-book-copy h3{font-size:23px;margin:9px 0}.handbook-book-copy p{font-size:11px;margin-bottom:14px}.handbook-book-copy .button{font-size:11px;padding:8px;gap:7px}.handbook-book-copy>small{font-size:9px;text-align:left;margin-top:12px}.handbook-divisions{padding:23px}.handbook-guide h3,.optional-divisions h3{font-size:26px}.handbook-divisions p{font-size:12px}.division-pills li{font-size:12px}.handbook-topic{gap:12px}.handbook-topic strong{font-size:13px}.handbook-topic small{font-size:11px}.optional-divisions{padding:23px;margin-top:28px}.optional-division-grid{grid-template-columns:1fr;gap:23px}.optional-division-grid section+section{border-left:0;border-top:1px solid var(--line);padding:23px 0 0}}
 @media(max-width:360px){.main-tabs button,.main-tabs>a{font-size:10px}.handbook-book{grid-template-columns:96px minmax(0,1fr)}.handbook-cover{margin-left:14px}.handbook-book-copy{padding:18px 12px}.handbook-book-copy h3{font-size:21px}.handbook-book-copy .eyebrow{line-height:1.7}}
 @media print{.handbook-book{display:none}.handbook-layout{display:block}.handbook-divisions,.optional-divisions{background:#fff;border:1px solid #aaa}.handbook-topic{padding:8px 0}.handbook-topics{margin-top:18px}.optional-divisions{break-inside:avoid;margin-top:18px}}
+
+/* The toolbar stays outside the scrolling page, including in iPhone standalone mode. */
+body.handbook-reader-open{position:fixed;left:0;right:0;overflow:hidden}
+#handbook-reader{position:fixed;inset:0;width:100%;max-width:none;height:100%;height:100dvh;max-height:none;margin:0;padding:0;border:0;border-radius:0;background:#f6edf1;color:var(--ink)}
+#handbook-reader[open]{display:flex;flex-direction:column}
+.reader-header{flex:none;background:#fffafc;border-bottom:1px solid #e4cfd9;padding:calc(10px + env(safe-area-inset-top)) max(16px,env(safe-area-inset-right)) 12px max(16px,env(safe-area-inset-left));box-shadow:0 2px 12px #5b324b0c;z-index:1}
+.reader-return{display:flex;align-items:center;justify-content:space-between;gap:16px}
+.reader-header button{min-height:44px;min-width:44px;padding:8px 13px;border:1px solid #ddc4d0;border-radius:9px;background:white;color:#963451;font:600 14px var(--sans);cursor:pointer}
+.reader-header button:disabled{opacity:.4;cursor:default}
+.reader-header button:hover:not(:disabled){background:#f8e7ef}
+.reader-header .reader-close{font:28px/1 var(--sans);padding:5px 12px}
+#handbook-reader h2{font:25px/1.25 var(--serif);margin:8px 0 12px}
+.reader-controls{display:flex;gap:8px;align-items:center;font-size:13px}
+.reader-controls label{display:flex;gap:6px;align-items:center;white-space:nowrap}
+.reader-controls select{min-height:44px;padding:8px;border:1px solid #ddc4d0;border-radius:8px;background:#fff;color:var(--ink);font-size:16px}
+.reader-controls [data-reader-zoom]{margin-left:auto}
+.reader-scroll{flex:1;min-height:0;overflow:auto;overscroll-behavior:contain;padding:16px max(12px,env(safe-area-inset-right)) calc(24px + env(safe-area-inset-bottom)) max(12px,env(safe-area-inset-left))}
+.reader-paper{width:100%;max-width:850px;margin:0 auto;box-shadow:0 2px 18px #54324918;background:white}
+.reader-paper img{display:block;width:100%;height:auto}
+.reader-paper.is-zoomed{width:1700px;max-width:none}
+.reader-message,.reader-text{max-width:850px;margin:16px auto}
+.reader-text{background:white;border:1px solid #e4cfd9;border-radius:10px;padding:16px;font-size:16px;line-height:1.65}
+.reader-text summary{cursor:pointer;color:#963451;font-weight:600;min-height:24px}
+.reader-text div{white-space:pre-wrap;overflow-wrap:anywhere;margin-top:16px}
+@media(max-width:400px){.reader-header{padding-left:12px;padding-right:12px}.reader-controls{gap:5px}.reader-controls button{padding:8px}.reader-controls label{gap:4px}}
+@media(max-height:500px){#handbook-reader h2{display:none}.reader-header{padding-top:env(safe-area-inset-top);padding-bottom:5px}.reader-return{float:left;margin-right:12px}.reader-controls{min-height:44px}.reader-return .reader-close{display:none}}
+
+#reader-status{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap;border:0}

@@ -141,3 +141,15 @@ netlify deploy --prod --no-build --site 29ab997e-0f97-4f5b-a994-87c96dc31405
 ```
 
 The site requests no search-engine indexing. This is not an access-control mechanism: published contestant scheduling fields are visible to anyone with the site link. The full private workbook never ships to browsers. No tracking or analytics are included.
+
+### Handbook reader
+
+All handbook reading links open an in-app page reader, including the cover, topic list, and optional division details. The persistent Back and Close controls, Escape key, and browser Back dismiss it and restore the handbook's scroll position and focus. Pages support zoom and an expandable text version. The separate Download PDF action still offers the original document.
+
+The reader uses committed page images and extracted text so iPhone home-screen apps do not depend on a native PDF viewer's missing browser controls. After changing the PDF, regenerate these assets with Python (`pypdf`, Pillow) and Poppler's `pdftoppm` on PATH:
+
+```sh
+python3 scripts/render-handbook.py
+```
+
+An optional first argument selects another local copy of the PDF. Commit `public/assets/handbook-page-*.jpg` and `public/data/handbook-pages.json` alongside the PDF update. The handbook integrity test checks the source hash, all 12 images, text availability, and in-app destinations.

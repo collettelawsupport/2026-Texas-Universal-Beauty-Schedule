@@ -1,6 +1,9 @@
 import { optionalStatus, optionalEntryLabels, unknownOptionals, sanitizeOptionalFields } from './optionals.js';
 import { sanitizeParticipationFields, participationLabel, winnersCircleNote } from './participation.js';
 import { renderHandbook } from './handbook.js';
+import { initHandbookReader } from './handbook-reader.js';
+
+initHandbookReader();
 import { portraitFor } from './portraits.js';
 import { competition, days, divisions, events, optionalCategories } from './data.js';
 import { STORE_KEY, escapeHTML as h, contestantName, matchesContestant, scheduleForView, scheduleClockKey, nextScheduleChange, timeLabel, parseSaved, calendarFile, eventInstant } from './logic.js';
