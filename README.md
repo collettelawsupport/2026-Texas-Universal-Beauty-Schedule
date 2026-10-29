@@ -35,9 +35,9 @@ Event content was transcribed from the organizer-provided `2026 Texas Universal 
 - Sunday Special Awards: 9:30–10:30 AM.
 - Sunday Grand Finals: 11:30 AM–1:30 PM.
 
-The source leaves most check-in and arrival times blank. These display **To be announced**. ProAm / Optional Talent check-in is the supplied 6:30 PM. Never substitute an event's start time for a missing check-in time.
+On October 29, 2026, the organizer confirmed that all contestants check in **15 minutes before every event except Livin’ Doll**. The 12 applicable events have explicit check-in times, including ProAm / Optional Talent at 6:15 PM. Livin’ Doll retains its existing unspecified check-in. Full schedule, daily views, personalized schedules, printouts, and calendar descriptions use the same event data. Event start times and the separate Queens report assignments are unchanged.
 
-Edit `src/data.js` to update events. Each event has a stable ID. Optional `divisions` or `contestantIds` arrays can restrict a future event to specific contestants. Current required events apply to every division, as stated in the source. Add specific division check-in rows only when the organizer provides them.
+Edit `src/data.js` to update events. Each event has a stable ID. Optional `divisions` or `contestantIds` arrays can restrict a future event to specific contestants. Current required events apply to every division, as stated in the source. Check-in times apply to all contestant divisions.
 
 ## Live roster connection
 

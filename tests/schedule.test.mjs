@@ -11,6 +11,21 @@ test('13 source events have confirmed times and positive durations', () => {
   assert.equal(new Set(events.map(e=>e.id)).size,13);
   for (const e of events) if(e.end) assert.ok(eventInstant(e,'end')>eventInstant(e), e.title);
 });
+test('contestant check-ins are 15 minutes early except Living Doll and carry into calendars', () => {
+ const doll = events.find(e => e.id === 'livin-doll');
+ assert.ok(!Object.hasOwn(doll, 'checkin'));
+ for (const event of events.filter(e => e !== doll)) {
+  assert.match(event.checkin, /^\d{2}:\d{2}$/);
+  assert.equal(eventInstant(event) - eventInstant(event, 'checkin'), 15 * 60_000, event.title);
+ }
+ const calendar = calendarFile(events, true).replace(/\r\n /g, '');
+ assert.equal((calendar.match(/Check-in:/g) || []).length, 12);
+ for (const [id, time] of [['registration', '3:45 PM'], ['pro-am', '6:15 PM'], ['evening-gown', '7:45 AM'], ['finals', '11:15 AM']]) {
+  const entry = calendar.split('BEGIN:VEVENT').find(value => value.includes(`UID:${id}-2026@`));
+  assert.ok(entry.includes(`Check-in: ${time}`), id);
+ }
+ assert.ok(!calendar.includes('Time to be announced'));
+});
 test('required and shared events are preserved; unentered optionals are excluded',()=> {
  const list=scheduleFor([person([])]);
  assert.ok(list.some(e=>e.id==='finals')); assert.ok(list.some(e=>e.id==='parents')); assert.ok(list.some(e=>e.id==='candyland'));
