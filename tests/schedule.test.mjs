@@ -11,16 +11,20 @@ test('13 source events have confirmed times and positive durations', () => {
   assert.equal(new Set(events.map(e=>e.id)).size,13);
   for (const e of events) if(e.end) assert.ok(eventInstant(e,'end')>eventInstant(e), e.title);
 });
-test('contestant check-ins are 15 minutes early except Living Doll and carry into calendars', () => {
- const doll = events.find(e => e.id === 'livin-doll');
- assert.ok(!Object.hasOwn(doll, 'checkin'));
- for (const event of events.filter(e => e !== doll)) {
+test('check-ins respect organizer exceptions in schedules and calendar exports', () => {
+ const exceptions = ['livin-doll', 'registration', 'candyland', 'farewell'];
+ for (const event of events.filter(e => exceptions.includes(e.id))) assert.ok(!Object.hasOwn(event, 'checkin'), event.title);
+ for (const event of events.filter(e => !exceptions.includes(e.id))) {
   assert.match(event.checkin, /^\d{2}:\d{2}$/);
   assert.equal(eventInstant(event) - eventInstant(event, 'checkin'), 15 * 60_000, event.title);
  }
  const calendar = calendarFile(events, true).replace(/\r\n /g, '');
- assert.equal((calendar.match(/Check-in:/g) || []).length, 12);
- for (const [id, time] of [['registration', '3:45 PM'], ['pro-am', '6:15 PM'], ['evening-gown', '7:45 AM'], ['finals', '11:15 AM']]) {
+ assert.equal((calendar.match(/Check-in:/g) || []).length, 9);
+ for (const id of exceptions) {
+  const entry = calendar.split('BEGIN:VEVENT').find(value => value.includes(`UID:${id}-2026@`));
+  assert.ok(entry && !entry.includes('Check-in:'), id);
+ }
+ for (const [id, time] of [['pro-am', '6:15 PM'], ['evening-gown', '7:45 AM'], ['finals', '11:15 AM']]) {
   const entry = calendar.split('BEGIN:VEVENT').find(value => value.includes(`UID:${id}-2026@`));
   assert.ok(entry.includes(`Check-in: ${time}`), id);
  }
