@@ -1,5 +1,6 @@
 // Organizer-supplied portraits are tied to stable roster IDs, not name guesses.
 const portraits = {
+  'contestant-99796932b0b04a123a4f2223': 'brynley-buzzard.jpg',
   'contestant-7a430f914fcdf0df0f444342': 'analisa-hernandez.png',
   'contestant-d0db144587f37d862bece431': 'aviendha-smith.jpg',
   'contestant-d3d52342cdeb2120ff2df9ed': 'bonnie-raquet.png',

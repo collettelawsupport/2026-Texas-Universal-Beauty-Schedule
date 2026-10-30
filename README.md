@@ -8,7 +8,7 @@ A responsive Candyland-themed guide to the October 30–November 1 Texas Our Lit
 - All 13 events, with day filters, search, event categories, attire, check-in notes, and event details.
 - Full schedule defaults to **Now & upcoming**: earlier start-time groups disappear when the next distinct start arrives in Central Time. Events sharing a start remain together, even if their end times differ. Before the weekend all events appear; the final farewell stays after the last start. Individual day views and My schedule retain their complete event lists. The open page advances automatically at start/end boundaries and catches up when returning from the background.
 - Contestant checkboxes build a separate **My schedule** tab. Switch between everyone being watched and one contestant.
-- Organizer-supplied portraits appear beside 15 contestants on roster cards, watch lists, and personal schedules. Photos are mapped to stable contestant IDs in `src/portraits.js`, so optional-entry imports preserve those associations. Brynley Buzzard, Victoria Stewart, and device-only personal profiles use initials until approved photos are provided. Netlify Image CDN serves small WebP copies; local previews use the supplied originals, and failed image requests fall back to the original or initials.
+- Organizer-supplied portraits appear beside 16 contestants on roster cards, watch lists, and personal schedules. Photos are mapped to stable contestant IDs in `src/portraits.js`, so optional-entry imports preserve those associations. Victoria Stewart and device-only personal profiles use initials until approved photos are provided. Netlify Image CDN serves small WebP copies; local previews use the supplied originals, and failed image requests fall back to the original or initials.
 - Required/shared events appear for competition contestants. Entered optionals are matched from the roster, and unknown entries remain visible with a confirmation note. Optionals-only entrants receive only confirmed optional stage sessions.
 - Watch selections and optional personal profiles are stored only in the current browser. They do not register contestants and do not sync between devices.
 - Personal profiles can be added or edited if the official roster is unavailable or an optional was added at registration.
@@ -153,3 +153,5 @@ python3 scripts/render-handbook.py
 ```
 
 An optional first argument selects another local copy of the PDF. Commit `public/assets/handbook-page-*.jpg` and `public/data/handbook-pages.json` alongside the PDF update. The handbook integrity test checks the source hash, all 12 images, text availability, and in-app destinations.
+
+Brynley Buzzard’s organizer-supplied portrait was added October 29, 2026, using her existing contestant ID and preserving her optionals-only status.
