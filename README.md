@@ -157,3 +157,15 @@ An optional first argument selects another local copy of the PDF. Commit `public
 Brynley Buzzard’s organizer-supplied portrait was added October 29, 2026, using her existing contestant ID and preserving her optionals-only status.
 
 As of October 31, both Full Schedule / Now & upcoming and Queens / All days remove events at their scheduled end times, retaining ongoing overlapping events. Assignments without an end time roll off at the next report/start time or the end of their day. Explicit day views and personal schedules remain complete. Clicking Full Schedule resets its day filter. Both overview screens refresh at boundaries and when returning to the app.
+
+### Program book
+
+The Program Book tab (`/#program`) publishes the organizer's 28-page Candyland program as supplied, with its original PDF download at `/documents/2026-texas-olm-program-book.pdf`. It shares the handbook's in-app reader, with previous/next pages, page selection, zoom, extracted text, and Back/Close controls. It is also linked from the Queens navigation. Each book loads its own manifest and restores focus to its own originating link.
+
+To update the program, replace the PDF and run:
+
+```sh
+python3 scripts/render-handbook.py public/documents/2026-texas-olm-program-book.pdf program
+```
+
+Commit the original PDF, `public/assets/program-page-*.jpg`, and `public/data/program-pages.json` together. Check the section shortcuts and page count in `src/program.js` if the pagination changes.

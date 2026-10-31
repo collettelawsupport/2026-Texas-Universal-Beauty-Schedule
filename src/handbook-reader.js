@@ -1,4 +1,4 @@
-// Keep the handbook inside the app: iPhone home-screen apps have no PDF browser toolbar.
+// Keep both books inside the app: iPhone home-screen apps have no PDF browser toolbar.
 export function initHandbookReader() {
   const dialog = document.createElement('dialog');
   dialog.id = 'handbook-reader';
@@ -16,14 +16,20 @@ export function initHandbookReader() {
   const text = dialog.querySelector('.reader-text');
   const select = dialog.querySelector('select');
   const zoom = dialog.querySelector('[data-reader-zoom]');
-  let manifest, loading, page = 1, origin, scrollY = 0, expanded = false;
+  const books = {
+    handbook: { title: 'Contestant handbook', label: 'handbook', pageLabel: 'Handbook', attribute: 'data-handbook-page', manifest: '/data/handbook-pages.json' },
+    program: { title: '2026 Program Book', label: 'program book', pageLabel: 'Program book', attribute: 'data-program-page', manifest: '/data/program-pages.json' }
+  };
+  const manifests = new Map();
+  let book = books.handbook;
+  let manifest, requestId = 0, page = 1, origin, scrollY = 0, expanded = false;
 
   function showPage(number) {
     if (!manifest) return;
     page = Math.max(1, Math.min(manifest.pages.length, number));
     const data = manifest.pages[page - 1];
     const img = document.createElement('img');
-    img.alt = `Contestant handbook, page ${page}. Text version available below.`;
+    img.alt = `${book.title}, page ${page}. Text version available below.`;
     img.width = data.width; img.height = data.height;
     img.addEventListener('error', () => {
       if (!paper.contains(img)) return;
@@ -32,7 +38,7 @@ export function initHandbookReader() {
     });
     img.src = data.image;
     paper.replaceChildren(img);
-    text.querySelector('div').textContent = data.text || 'Cover: 2026 Texas Our Little Miss Universal Beauty contestant handbook. Welcome to Candyland.';
+    text.querySelector('div').textContent = data.text || `${book.title}, page ${page}. This page contains artwork without selectable text.`;
     message.hidden = true;
     select.value = String(page);
     dialog.querySelector('[data-reader-previous]').disabled = page === 1;
@@ -41,9 +47,19 @@ export function initHandbookReader() {
     scroller.scrollTo(0, 0);
   }
 
-  async function open(number, trigger) {
+  async function open(number, trigger, selectedBook) {
     if (dialog.open) return;
+    const request = ++requestId;
+    book = selectedBook;
     origin = trigger;
+    dialog.querySelector('#reader-title').textContent = book.title;
+    dialog.querySelector('[data-reader-close]').textContent = `← Back to ${book.label}`;
+    dialog.querySelector('.reader-close').setAttribute('aria-label', `Close ${book.label}`);
+    select.setAttribute('aria-label', `${book.pageLabel} page`);
+    scroller.setAttribute('aria-label', `${book.pageLabel} page content`);
+    manifest = null;
+    select.replaceChildren();
+    dialog.querySelector('#reader-total').textContent = '';
     scrollY = window.scrollY;
     // Save the page position before locking the body for mobile Safari.
     history.pushState({ ...history.state, handbookReader: true }, '', location.href);
@@ -55,19 +71,24 @@ export function initHandbookReader() {
     text.open = false;
     if (!manifest) {
       paper.replaceChildren(); text.hidden = true;
-      message.hidden = false; message.textContent = 'Loading handbook…';
+      message.hidden = false; message.textContent = `Loading ${book.label}…`;
       dialog.querySelectorAll('.reader-controls button, .reader-controls select').forEach(el => el.disabled = true);
       try {
-        loading ||= fetch('/data/handbook-pages.json').then(response => {
-          if (!response.ok) throw new Error('Handbook unavailable');
-          return response.json();
-        });
-        manifest = await loading;
+        const url = book.manifest;
+        if (!manifests.has(url)) {
+          manifests.set(url, fetch(url).then(response => {
+            if (!response.ok) throw new Error('Book unavailable');
+            return response.json();
+          }).catch(error => { manifests.delete(url); throw error; }));
+        }
+        const loaded = await manifests.get(url);
+        if (request !== requestId || !dialog.open) return;
+        manifest = loaded;
         select.replaceChildren(...manifest.pages.map((_, index) => new Option(String(index + 1), String(index + 1))));
         dialog.querySelector('#reader-total').textContent = `of ${manifest.pages.length}`;
       } catch {
-        loading = null;
-        message.textContent = 'The handbook could not load. Go back and reopen it to try again.';
+        if (request !== requestId || !dialog.open) return;
+        message.textContent = `The ${book.label} could not load. Go back and reopen it to try again.`;
         return;
       }
     }
@@ -90,11 +111,12 @@ export function initHandbookReader() {
   });
   select.addEventListener('change', () => showPage(Number(select.value)));
   dialog.addEventListener('close', () => {
+    requestId++;
     document.body.classList.remove('handbook-reader-open');
     document.body.style.top = '';
     window.scrollTo(0, scrollY);
     // Background roster refreshes can replace the original link while reading.
-    const target = origin?.isConnected ? origin : document.querySelector(`[data-handbook-page="${origin?.dataset.handbookPage}"]`);
+    const target = origin?.isConnected ? origin : document.querySelector(`[${book.attribute}="${origin?.getAttribute(book.attribute)}"]`);
     target?.focus({ preventScroll: true });
     if (history.state?.handbookReader) history.back();
   });
@@ -102,9 +124,10 @@ export function initHandbookReader() {
   // A reload or restored history entry should never leave an invisible modal state behind.
   if (history.state?.handbookReader) history.replaceState(null, '', location.href);
   document.addEventListener('click', event => {
-    const link = event.target.closest('[data-handbook-page]');
+    const link = event.target.closest('[data-handbook-page], [data-program-page]');
     if (!link) return;
     event.preventDefault();
-    open(Number(link.dataset.handbookPage), link);
+    const selectedBook = link.hasAttribute('data-program-page') ? books.program : books.handbook;
+    open(Number(link.getAttribute(selectedBook.attribute)), link, selectedBook);
   });
 }

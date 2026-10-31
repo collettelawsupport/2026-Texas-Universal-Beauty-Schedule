@@ -37,3 +37,28 @@ test('every handbook reading link stays inside the app and targets an existing p
   // Only the explicit Download action points straight at the PDF.
   assert.equal(links.filter(link => link.includes('.pdf') && !link.includes('download')).length, 0);
 });
+
+test('the program reader includes all 28 pages and downloads the matching original PDF', async () => {
+  const { renderProgram } = await import('../src/program.js');
+  const program = JSON.parse(await readFile(new URL('../public/data/program-pages.json', import.meta.url)));
+  const pdf = await readFile(new URL('../public/documents/2026-texas-olm-program-book.pdf', import.meta.url));
+  assert.equal(program.sourceSha256, createHash('sha256').update(pdf).digest('hex'));
+  assert.equal(program.pages.length, 28);
+  for (const [index, page] of program.pages.entries()) {
+    assert.equal(page.image, `/assets/program-page-${String(index + 1).padStart(2, '0')}.jpg`);
+    const bytes = await readFile(new URL('../public' + page.image, import.meta.url));
+    assert.equal(bytes.subarray(0, 3).toString('hex'), 'ffd8ff');
+    assert.ok(page.width >= 1200 && page.height > page.width);
+    if (index > 0) assert.ok(page.text.trim().length > 20);
+  }
+  const html = renderProgram();
+  const links = [...html.matchAll(/<a\b[^>]*>/g)].map(match => match[0]);
+  const readerLinks = links.filter(link => link.includes('data-program-page'));
+  assert.equal(readerLinks.length, 10);
+  for (const link of readerLinks) {
+    const number = Number(link.match(/data-program-page="(\d+)"/)[1]);
+    assert.ok(number >= 1 && number <= program.pages.length);
+    assert.ok(link.includes('href="#program"') && !link.includes('target='));
+  }
+  assert.ok(links.some(link => link.includes('href="/documents/2026-texas-olm-program-book.pdf"') && link.includes('download')));
+});

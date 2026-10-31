@@ -1,7 +1,8 @@
 import { optionalStatus, optionalEntryLabels, unknownOptionals, sanitizeOptionalFields } from './optionals.js';
 import { sanitizeParticipationFields, participationLabel, winnersCircleNote } from './participation.js';
+import { renderProgram } from './program.js';
 import { renderHandbook } from './handbook.js';
-import { initHandbookReader } from './handbook-reader.js';
+import { initHandbookReader } from './handbook-reader.js?v=20261031-program';
 
 initHandbookReader();
 import { portraitFor } from './portraits.js';
@@ -12,7 +13,7 @@ let saved;
 try { saved = parseSaved(localStorage.getItem(STORE_KEY)); } catch { saved = parseSaved(null); }
 // Remove retired optional fields from older saved profiles without changing watch IDs.
 try { localStorage.setItem(STORE_KEY, JSON.stringify(saved)); } catch {}
-const initialTab = ['mine', 'contestants', 'handbook'].includes(location.hash.slice(1)) ? location.hash.slice(1) : 'schedule';
+const initialTab = ['mine', 'contestants', 'handbook', 'program'].includes(location.hash.slice(1)) ? location.hash.slice(1) : 'schedule';
 const state = { ...saved, roster: [], rosterState: 'loading', syncedAt: null, tab: initialTab, day: 'all', category: 'all', search: '', division: 'all', person: 'all', onlyWatched: false };
 let toastTimer;
 let renderedEventClockKey;
@@ -101,7 +102,7 @@ function render() {
   if (state.person !== 'all' && !watched().some(c => c.id === state.person)) state.person = 'all';
   document.querySelectorAll('[data-tab]').forEach(b => { b.setAttribute('aria-current', b.dataset.tab === state.tab ? 'page' : 'false'); });
   $('#watch-count').textContent = watched().length;
-  $('#content').innerHTML = state.tab === 'contestants' ? renderContestants() : state.tab === 'handbook' ? renderHandbook() : renderSchedule();
+  $('#content').innerHTML = state.tab === 'contestants' ? renderContestants() : state.tab === 'handbook' ? renderHandbook() : state.tab === 'program' ? renderProgram() : renderSchedule();
 }
 function openProfile(id) {
   const c = state.personal.find(p => p.id === id);
@@ -168,7 +169,7 @@ async function loadRoster() {
 }
 window.addEventListener('hashchange', () => {
   const tab = location.hash.slice(1);
-  if (['mine', 'contestants', 'handbook'].includes(tab)) switchTab(tab);
+  if (['mine', 'contestants', 'handbook', 'program'].includes(tab)) switchTab(tab);
   else if (!tab) switchTab('schedule');
 });
 window.addEventListener('storage', event => { if (event.key === STORE_KEY) { Object.assign(state, parseSaved(event.newValue)); render(); } });
