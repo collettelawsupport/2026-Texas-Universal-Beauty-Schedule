@@ -6,7 +6,7 @@ import { initHandbookReader } from './handbook-reader.js';
 initHandbookReader();
 import { portraitFor } from './portraits.js';
 import { competition, days, divisions, events, optionalCategories } from './data.js';
-import { STORE_KEY, escapeHTML as h, contestantName, matchesContestant, scheduleForView, scheduleClockKey, nextScheduleChange, timeLabel, parseSaved, calendarFile, eventInstant } from './logic.js';
+import { STORE_KEY, escapeHTML as h, contestantName, matchesContestant, scheduleForView, scheduleClockKey, nextScheduleChange, timeLabel, parseSaved, calendarFile, eventInstant } from './logic.js?v=20261031';
 const $ = selector => document.querySelector(selector);
 let saved;
 try { saved = parseSaved(localStorage.getItem(STORE_KEY)); } catch { saved = parseSaved(null); }
@@ -43,7 +43,7 @@ document.addEventListener('error', event => {
   if (img.getAttribute('src') !== img.dataset.original) img.src = img.dataset.original;
   else img.remove();
 }, true);
-function switchTab(tab) { state.tab = tab; state.search = ''; state.category = 'all'; history.replaceState(null, '', tab === 'schedule' ? location.pathname : `#${tab}`); render(); }
+function switchTab(tab) { state.tab = tab; if (tab === 'schedule') state.day = 'all'; state.search = ''; state.category = 'all'; history.replaceState(null, '', tab === 'schedule' ? location.pathname : `#${tab}`); render(); }
 function divisionLabel(c) { return [c.division, participationLabel(c), c.program === 'prince' ? 'Prince' : ''].filter(Boolean).join(' · '); }
 function filteredEvents() {
   const list = scheduleForView({ tab: state.tab, day: state.day, contestants: selected() });
@@ -81,7 +81,7 @@ function eventResults() {
   if (state.tab === 'mine' && !watched().length) return `<div class="empty-state"><span class="empty-icon">${icons.heart}</span><h3>Your weekend, made personal.</h3><p>Choose the contestants you’re cheering for to see their events here.</p><button class="button primary" data-go="contestants">Find contestants ${icons.arrow}</button></div>`;
   const list = filteredEvents();
   if (!list.length) return `<div class="empty-state"><span class="empty-icon">${icons.search}</span><h3>No events in this view</h3><p>Try a different day or clear your filters.</p><button class="button button-outline" id="reset-filters">Show all events</button></div>`;
-  return `${state.tab === 'schedule' && state.day === 'all' ? '<p class="schedule-time-note">Updates automatically in Central Time. Earlier events leave this view when the next event starts. Choose a day to see its complete schedule.</p>' : ''}<p class="result-count" aria-live="polite">${list.length} event${list.length === 1 ? '' : 's'}${state.tab === 'mine' ? ` for ${selected().length === 1 ? h(contestantName(selected()[0])) : 'your cheering section'}` : ' across the weekend'} <span>Tap an event for the details</span></p>${days.map((d, i) => {
+  return `${state.tab === 'schedule' && state.day === 'all' ? '<p class="schedule-time-note">Updates automatically in Central Time. Events leave this view at their scheduled end time. Choose a day to see its complete schedule.</p>' : ''}<p class="result-count" aria-live="polite">${list.length} event${list.length === 1 ? '' : 's'}${state.tab === 'mine' ? ` for ${selected().length === 1 ? h(contestantName(selected()[0])) : 'your cheering section'}` : ' across the weekend'} <span>Tap an event for the details</span></p>${days.map((d, i) => {
     const todayEvents = list.filter(e => e.date === d.date);
     return todayEvents.length ? `<section class="day-section"><div class="day-heading"><span class="date-stamp"><small>${d.month}</small><strong>${d.number}</strong></span><div><span class="day-kicker">DAY ${String(i + 1).padStart(2, '0')} · ${d.label.toUpperCase()}</span><h2>${d.title}</h2><p>${d.subtitle}</p></div></div><div class="event-list">${todayEvents.map(eventCard).join('')}</div></section>` : '';
   }).join('')}`;

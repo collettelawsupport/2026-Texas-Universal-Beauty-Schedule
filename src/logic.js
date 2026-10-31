@@ -12,21 +12,31 @@ export function matchesContestant(event, contestant) {
   return optionalStatus(event, contestant) !== 'not-entered';
 }
 export const scheduleFor = contestants => events.filter(event => contestants.some(c => matchesContestant(event, c)));
+// Overview schedules hide ended events; explicit day and personal views remain complete.
+export function eventEndInstant(event, list = events) {
+  if (event.end) return eventInstant(event, 'end').getTime();
+  const start = eventInstant(event).getTime();
+  const next = list.flatMap(item => [eventInstant(item).getTime(), ...(item.report ? [eventInstant(item, 'report').getTime()] : [])]).filter(time => time > start);
+  // Untimed endings (reports, inspections, farewell) last until the next assignment,
+  // but never linger into the following competition day.
+  const nextDate = new Date(`${event.date}T12:00:00Z`);
+  nextDate.setUTCDate(nextDate.getUTCDate() + 1);
+  const midnight = eventInstant({ date: nextDate.toISOString().slice(0, 10), start: '00:00' }).getTime();
+  return Math.min(midnight, ...next);
+}
+export function remainingEvents(list, now = Date.now()) {
+  return list.filter(event => now < eventEndInstant(event, list));
+}
 export function scheduleForView({ tab = 'schedule', day = 'all', contestants = [], now = Date.now() } = {}) {
   let list = tab === 'mine' ? scheduleFor(contestants) : events;
-  if (tab === 'schedule' && day === 'all') {
-    // A group remains until the next distinct start, even after its scheduled end.
-    const started = events.map(event => eventInstant(event).getTime()).filter(start => start <= now);
-    const latestStart = Math.max(-Infinity, ...started);
-    list = list.filter(event => eventInstant(event).getTime() >= latestStart);
-  }
+  if (tab === 'schedule' && day === 'all') list = remainingEvents(list, now);
   return list.filter(event => day === 'all' || event.date === day);
 }
-export function scheduleClockKey(now = Date.now()) {
-  return events.map(event => now < eventInstant(event) ? 'upcoming' : event.end && now >= eventInstant(event, 'end') ? 'ended' : 'started').join(',');
+export function scheduleClockKey(now = Date.now(), list = events) {
+  return list.map(event => now >= eventEndInstant(event, list) ? 'ended' : now < eventInstant(event) ? 'upcoming' : 'started').join(',');
 }
-export function nextScheduleChange(now = Date.now()) {
-  const future = events.flatMap(event => [eventInstant(event).getTime(), ...(event.end ? [eventInstant(event, 'end').getTime()] : [])]).filter(time => time > now);
+export function nextScheduleChange(now = Date.now(), list = events) {
+  const future = list.flatMap(event => [eventInstant(event).getTime(), eventEndInstant(event, list)]).filter(time => time > now);
   return future.length ? Math.min(...future) : null;
 }
 export function timeLabel(time) {
@@ -45,7 +55,7 @@ export function parseSaved(raw) {
 }
 export function eventInstant(event, field = 'start') {
   // The competition crosses the 2026 daylight-saving transition. Sunday is CST.
-  return new Date(`${event.date}T${event[field] || event.start}:00${event.date >= '2026-11-01' ? '-06:00' : '-05:00'}`);
+  return new Date(`${event.date}T${event[field] || event.start || event.report}:00${event.date >= '2026-11-01' ? '-06:00' : '-05:00'}`);
 }
 export function calendarFile(selectedEvents, confirmed, contestants = []) {
   const escape = text => String(text).replace(/\\/g, '\\\\').replace(/\n/g, '\\n').replace(/;/g, '\\;').replace(/,/g, '\\,');

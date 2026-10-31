@@ -1,4 +1,4 @@
-import { escapeHTML as escape, timeLabel } from './logic.js';
+import { escapeHTML as escape, timeLabel, remainingEvents, scheduleClockKey, nextScheduleChange } from './logic.js?v=20261031';
 import { days } from './data.js';
 
 const form = document.querySelector('#queens-login');
@@ -10,6 +10,8 @@ let activeDay = 'all';
 let query = '';
 let expirationTimer;
 let loading = false;
+let scheduleTimer;
+let renderedClockKey;
 
 if (form) {
   const input = document.querySelector('#queens-password');
@@ -47,12 +49,14 @@ function eventCard(event) {
   const primaryTime = event.report || event.start;
   const range = event.start ? `${timeLabel(event.start)}${event.end ? ' – ' + timeLabel(event.end) : ''}` : '';
   const fields = [['Royalty & assignments', event.royalty], ['Chaperones', event.chaperones], ['Wardrobe', event.wardrobe], ['Details', event.notes], ['Dismissal times', event.dismissal]];
-  return `<article class="event-row"><div class="event-time"><strong>${escape(timeLabel(primaryTime)).replace(/ (AM|PM)$/, ' <span>$1</span>')}</strong><small>${event.report ? 'REPORT TIME' : 'EVENT TIME'}</small></div><div class="timeline-mark" aria-hidden="true"><span></span></div><details class="event-card queens-event"><summary><div class="event-main"><div class="event-labels"><span class="tag ${event.report ? 'competition' : 'essential'}">${event.report ? 'REPORT READY' : 'ON THE SCHEDULE'}</span>${event.group ? `<span class="queen-group">${escape(event.group)}</span>` : ''}</div><h3>${escape(event.title)}</h3>${range && event.report ? `<p>Event: ${escape(range)}</p>` : event.end ? `<p>Until ${escape(timeLabel(event.end))}</p>` : ''}${event.wardrobe ? `<p class="queen-wardrobe"><span aria-hidden="true">◇</span> ${paragraph(event.wardrobe)}</p>` : ''}</div><span class="expand-icon" aria-hidden="true">+</span></summary><div class="event-details">${fields.filter(([, value]) => value).map(([label, value]) => `<div class="queen-detail"><h4>${label}</h4><p>${paragraph(value)}</p></div>`).join('')}</div></details></article>`;
+  return `<article class="event-row"><div class="event-time"><strong>${escape(timeLabel(primaryTime)).replace(/ (AM|PM)$/, ' <span>$1</span>')}</strong><small>${event.report ? 'REPORT TIME' : 'EVENT TIME'}</small></div><div class="timeline-mark" aria-hidden="true"><span></span></div><details class="event-card queens-event" data-event-id="${escape(event.id)}"><summary><div class="event-main"><div class="event-labels"><span class="tag ${event.report ? 'competition' : 'essential'}">${event.report ? 'REPORT READY' : 'ON THE SCHEDULE'}</span>${event.group ? `<span class="queen-group">${escape(event.group)}</span>` : ''}</div><h3>${escape(event.title)}</h3>${range && event.report ? `<p>Event: ${escape(range)}</p>` : event.end ? `<p>Until ${escape(timeLabel(event.end))}</p>` : ''}${event.wardrobe ? `<p class="queen-wardrobe"><span aria-hidden="true">◇</span> ${paragraph(event.wardrobe)}</p>` : ''}</div><span class="expand-icon" aria-hidden="true">+</span></summary><div class="event-details">${fields.filter(([, value]) => value).map(([label, value]) => `<div class="queen-detail"><h4>${label}</h4><p>${paragraph(value)}</p></div>`).join('')}</div></details></article>`;
 }
 function render() {
   if (!schedule) return;
-  const matched = schedule.events.filter(event => (activeDay === 'all' || event.date === activeDay) && [event.title, event.group, event.royalty, event.chaperones, event.wardrobe, event.notes, event.dismissal].join(' ').toLowerCase().includes(query));
-  status.textContent = `${matched.length} ${matched.length === 1 ? 'event' : 'events'}${query ? ' matching your search' : ' for your royal weekend'}`;
+  renderedClockKey = scheduleClockKey(Date.now(), schedule.events);
+  const visible = activeDay === 'all' ? remainingEvents(schedule.events) : schedule.events;
+  const matched = visible.filter(event => (activeDay === 'all' || event.date === activeDay) && [event.title, event.group, event.royalty, event.chaperones, event.wardrobe, event.notes, event.dismissal].join(' ').toLowerCase().includes(query));
+  status.textContent = `${matched.length} ${matched.length === 1 ? 'event' : 'events'}${query ? ' matching your search' : activeDay === 'all' ? ' current and upcoming · Central Time' : ' for your royal weekend'}`;
   eventsElement.innerHTML = matched.length ? days.map(day => {
     const events = matched.filter(event => event.date === day.date);
     if (!events.length) return '';
@@ -62,6 +66,22 @@ function render() {
     query = ''; activeDay = 'all'; document.querySelector('#queens-search').value = ''; updateDayButtons(); render();
   });
 }
+function refreshTimedSchedule() {
+  clearTimeout(scheduleTimer);
+  if (!schedule) return;
+  const now = Date.now();
+  if (!document.hidden && activeDay === 'all' && scheduleClockKey(now, schedule.events) !== renderedClockKey) {
+    const openIds = [...eventsElement.querySelectorAll('details[open]')].map(card => card.dataset.eventId);
+    const focusedId = document.activeElement?.closest('.queens-event')?.dataset.eventId;
+    render();
+    eventsElement.querySelectorAll('details').forEach(card => {
+      card.open = openIds.includes(card.dataset.eventId);
+      if (card.dataset.eventId === focusedId) card.querySelector('summary').focus({ preventScroll: true });
+    });
+  }
+  const next = nextScheduleChange(now, schedule.events);
+  scheduleTimer = setTimeout(refreshTimedSchedule, next === null ? 60000 : Math.max(1, Math.min(60000, next - Date.now())));
+}
 function updateDayButtons() {
   document.querySelectorAll('[data-day]').forEach(button => {
     const selected = button.dataset.day === activeDay;
@@ -69,7 +89,7 @@ function updateDayButtons() {
   });
 }
 function lock() {
-  schedule = null; eventsElement?.replaceChildren(); clearTimeout(expirationTimer);
+  schedule = null; eventsElement?.replaceChildren(); clearTimeout(expirationTimer); clearTimeout(scheduleTimer);
   location.replace('/queens/');
 }
 async function loadSchedule() {
@@ -86,7 +106,7 @@ async function loadSchedule() {
     schedule = result;
     clearTimeout(expirationTimer);
     expirationTimer = setTimeout(lock, Math.max(0, result.sessionExpiresAt - Date.now()));
-    render(); document.querySelector('#print-queens').disabled = false;
+    render(); refreshTimedSchedule(); document.querySelector('#print-queens').disabled = false;
   } catch (err) {
     schedule = null; eventsElement.replaceChildren(); document.querySelector('#print-queens').disabled = true;
     status.textContent = err instanceof TypeError ? 'Unable to connect. Check your connection and select Refresh.' : err.message;
@@ -119,7 +139,7 @@ if (signOut) {
     expandedForPrint.forEach(card => { card.open = false; }); expandedForPrint = [];
   });
   // Private schedule data lives only in memory; recheck access when returning to the page.
-  window.addEventListener('pagehide', () => { schedule = null; eventsElement.replaceChildren(); });
+  window.addEventListener('pagehide', () => { clearTimeout(scheduleTimer); schedule = null; eventsElement.replaceChildren(); });
   window.addEventListener('pageshow', event => { if (event.persisted) loadSchedule(); });
   document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') loadSchedule(); });
   loadSchedule();
